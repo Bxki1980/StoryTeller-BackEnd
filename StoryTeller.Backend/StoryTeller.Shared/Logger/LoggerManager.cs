@@ -1,4 +1,6 @@
-﻿namespace StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Logger
+﻿using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
+
+namespace StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Logger
 {
     public class LoggerManager:ILoggerManager
     {

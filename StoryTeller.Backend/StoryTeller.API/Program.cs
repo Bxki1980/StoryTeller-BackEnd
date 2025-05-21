@@ -1,22 +1,27 @@
-var builder = WebApplication.CreateBuilder();
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Logger;
+using System.Text;
 
+var builder = WebApplication.CreateBuilder(args);
+
+// Register services before Build
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
-// AutoMapprt
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>(); // Your Cosmos repo
+builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
+
+
+// AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-//services 
-
-
-
-
-
-var app = builder.Build();
-
-//CORS poilicy
+// CORS policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -27,8 +32,28 @@ builder.Services.AddCors(options =>
     });
 });
 
-app.UseCors("AllowAll");
+// JWT Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
+            )
+        };
+    });
 
+var app = builder.Build();
+
+// Middlewares
+app.UseCors("AllowAll");
 
 if (app.Environment.IsDevelopment())
 {
@@ -36,6 +61,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
+
 app.Run();

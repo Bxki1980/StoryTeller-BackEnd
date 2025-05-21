@@ -1,20 +1,20 @@
 ﻿namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Auth
 {
 
-    public class UserSignupDtos
+    public class UserSignupDto
     {
         public String Email { get; set; }
         public String Password { get; set; }
     }
 
-    public class UserLoginDtos
+    public class UserLoginDto
     {
         public String Email { get; set; }
         public String Password { get; set; }
     }
 
 
-    public class AuthResponseDtos
+    public class AuthResponseDto
     {
         public String Token { get; set; }
         public String Email { get; set; }

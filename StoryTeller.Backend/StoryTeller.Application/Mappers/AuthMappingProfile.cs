@@ -8,7 +8,7 @@ namespace StoryTeller.Application.Mappers
     {
         public AuthMappingProfile()
         {
-            CreateMap<UserSignupDtos, User>();
+            CreateMap<UserSignupDto, User>();
         }
     }
 }
