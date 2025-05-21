@@ -1,6 +1,4 @@
-﻿using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
-using System.Collections.Concurrent;
-using System.ComponentModel;
+﻿using Microsoft.Azure.Cosmos;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositories
 {
@@ -28,12 +26,14 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
                 {
                     return user;
                 }
-                return null;
+                
             }
+            
+            return null;
         }
         public async Task CreateAsync(User user)
         {
-            await _container.CreateItemAsync(user, new PartitionKey(user.BookId));
+            await _container.CreateItemAsync(user, new PartitionKey(user.Id));
         }
     }
 }
