@@ -20,7 +20,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth
         {
             var claims = new[]
             {
-                    new Claim(ClaimTypes.Email, user.Emial),
+                    new Claim(ClaimTypes.Email, user.Email),
                     new Claim(ClaimTypes.Role, user.Role.ToString()),
                     new Claim(ClaimTypes.NameIdentifier, user.Id)
                 };

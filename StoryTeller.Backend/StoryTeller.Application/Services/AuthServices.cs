@@ -40,7 +40,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
             var user = _mapper.Map<User>(dto);
             user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
 
-            await _userRepository.CreateASync(user);
+            await _userRepository.CreateAsync(user);
 
             _logger.LogInfo($"User registered {user.Email}");
 
@@ -61,7 +61,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
                 throw new Exception("User not found");
             }
 
-            var result = _passwordHasher.VerifyHashedPassword(user, user.password, dto.Password);
+            var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
             if (result == PasswordVerificationResult.Failed)
             {
                 throw new Exception("Invalid credentials");
