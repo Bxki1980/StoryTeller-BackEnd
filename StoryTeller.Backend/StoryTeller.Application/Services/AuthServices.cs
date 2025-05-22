@@ -15,9 +15,12 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly PasswordHasher<User> _passwordHasher;
         private readonly JwtTokenGenerator _tokenGenerator;
+        private readonly TokenService _tokenService;
+        private readonly IRefreshTokenRepository _refreshTokenRepo;
 
 
-        public AuthServices(IMapper mapper, IConfiguration config, ILoggerManager logger, IUserRepository userRepository, JwtTokenGenerator tokenGenerator)
+
+        public AuthServices(IMapper mapper, IConfiguration config, ILoggerManager logger, IUserRepository userRepository, JwtTokenGenerator tokenGenerator, TokenService tokenService, IRefreshTokenRepository refreshTokenRepo)
         {
             _mapper = mapper;
             _config = config;
@@ -25,6 +28,8 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
             _userRepository = userRepository;
             _passwordHasher = new PasswordHasher<User>();
             _tokenGenerator = tokenGenerator;
+            _tokenService = tokenService;
+            _refreshTokenRepo = refreshTokenRepo;
         }
 
 
@@ -44,11 +49,20 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
 
             _logger.LogInfo($"User registered {user.Email}");
 
+            var refreshToken = new RefreshToken
+            {
+                Token = _tokenService.GenerateRefreshToken(),
+                UserId = user.Id,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+            await _refreshTokenRepo.CreateAsync(refreshToken);
+
             return new AuthResponseDto
             {
                 Email = user.Email,
                 Role = user.Role.ToString(),
                 Token = _tokenGenerator.GenerateToken(user),
+                RefreshToken = user.RefreshToken,
 
             };
         }
@@ -67,6 +81,15 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
                 throw new Exception("Invalid credentials");
             }
 
+            // Generate refresh token
+            var refreshToken = new RefreshToken
+            {
+                Token = _tokenService.GenerateRefreshToken(),
+                UserId = user.Id,
+                Expires = DateTime.UtcNow.AddDays(7),
+            };
+            await _refreshTokenRepo.CreateAsync(refreshToken);
+
             _logger.LogInfo($"User logged in: {user.Email}");
 
             return new AuthResponseDto
@@ -74,7 +97,11 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
                 Email = user.Email,
                 Role = user.Role.ToString(),
                 Token = _tokenGenerator.GenerateToken(user),
+                RefreshToken = user.RefreshToken,
             };
         }
+
+
+
     }
 }

@@ -8,12 +8,14 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities
     public class User
     {
         [JsonProperty("id")]
-        public String Id { get; set; } = Guid.NewGuid().ToString();
+        public string Id { get; set; } = Guid.NewGuid().ToString();
         [JsonProperty("email")]
-        public String Email { get; set; } = String.Empty;
+        public string Email { get; set; } = string.Empty;
         [JsonProperty("passwordHash")]
-        public String PasswordHash { get; set; } = String.Empty;
+        public string PasswordHash { get; set; } = string.Empty;
         [JsonProperty("role")]
         public UserRole Role { get; set; } = UserRole.Free;
+        public string RefreshToken { get; set; }
+        public DateTime RefreshTokenExpiry { get; set; }
     }
 }

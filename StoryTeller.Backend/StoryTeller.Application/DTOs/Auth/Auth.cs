@@ -3,22 +3,23 @@
 
     public class UserSignupDto
     {
-        public String Email { get; set; }
-        public String Password { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
     }
 
     public class UserLoginDto
     {
-        public String Email { get; set; }
-        public String Password { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
     }
 
 
     public class AuthResponseDto
     {
-        public String Token { get; set; }
-        public String Email { get; set; }
-        public String Role { get; set; }
+        public string Token { get; set; }
+        public string RefreshToken { get; set; }
+        public string Email { get; set; }
+        public string Role { get; set; }
     }
 
 }

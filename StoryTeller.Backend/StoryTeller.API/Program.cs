@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositories;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Logger;
 using System.Text;
 
@@ -13,9 +15,11 @@ builder.Services.AddSwaggerGen();
 
 
 
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<AuthServices, AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>(); // Your Cosmos repo
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
 
 
 // AutoMapper
