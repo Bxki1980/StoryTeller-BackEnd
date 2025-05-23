@@ -6,5 +6,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces
     {
         Task<AuthResponseDto> RegisterAsync(UserSignupDto dto);
         Task<AuthResponseDto> LoginAsync(UserLoginDto dto);
+        Task<AuthResponseDto> RefreshTokenAsync(RefreshRequestDto dto);
+
     }
 }

@@ -5,7 +5,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces
     public interface IRefreshTokenRepository
     {
         Task CreateAsync(RefreshToken token);
-        Task<RefreshToken?> GetByTokenASync(string token);
+        Task<RefreshToken?> GetByTokenAsync(string token);
         Task InvalidateAsync(string token);
     }
 }

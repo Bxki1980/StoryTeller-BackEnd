@@ -62,7 +62,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
                 Email = user.Email,
                 Role = user.Role.ToString(),
                 Token = _tokenGenerator.GenerateToken(user),
-                RefreshToken = user.RefreshToken,
+                RefreshToken = refreshToken.Token,
 
             };
         }
@@ -97,7 +97,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
                 Email = user.Email,
                 Role = user.Role.ToString(),
                 Token = _tokenGenerator.GenerateToken(user),
-                RefreshToken = user.RefreshToken,
+                RefreshToken = refreshToken.Token,
             };
         }
 
