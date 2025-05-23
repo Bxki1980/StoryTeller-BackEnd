@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositories;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Logger;
 using System.Text;
@@ -20,6 +22,9 @@ builder.Services.AddScoped<AuthServices, AuthServices>();
 builder.Services.AddScoped<IUserRepository, UserRepository>(); // Your Cosmos repo
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<JwtTokenGenerator>();
+builder.Services.AddScoped<TokenService>();
+
 
 
 
@@ -57,16 +62,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 // Google Authentication
 builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-    })
-    .AddCookie()
-    .AddGoogle(options =>
-    {
-        options.ClientId = config["Authentication:Google:ClientId"];
-        options.ClientSecret = config["Authentication:Google:ClientSecret"];
-    });
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+})
+.AddCookie()
+.AddGoogle(options =>
+{
+    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+});
+
 
 
 var app = builder.Build();

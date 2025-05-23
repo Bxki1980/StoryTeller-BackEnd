@@ -1,8 +1,10 @@
 ﻿using Microsoft.Azure.Cosmos;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositories
 {
-    public class UserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly Container _container;
 
@@ -13,7 +15,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
             _container = database.GetContainer(config["Cosmos:UserContainer"]);
         }
 
-        public async Task<User?> GetByEmailAsync(string email)
+        public async Task<Domain.Entities.User?> GetByEmailAsync(string email)
         {
 
 
@@ -23,7 +25,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
                     .WithParameter("@email", email);
 
 
-                using var iterator = _container.GetItemQueryIterator<User>(query);
+                using var iterator = _container.GetItemQueryIterator<Domain.Entities.User>(query);
                 while (iterator.HasMoreResults)
                 {
                     foreach (var user in await iterator.ReadNextAsync())
@@ -47,7 +49,9 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
                 return null;
             }
         }
-        public async Task CreateAsync(User user)
+
+
+        public async Task CreateAsync(Domain.Entities.User user)
         {
             try
             {
@@ -64,7 +68,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
             }
         }
 
-        public async Task UpdateAsync(User user)
+        public async Task UpdateAsync(Domain.Entities.User user)
         {
             try 
             {
@@ -85,12 +89,17 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
         {
             try
             {
-                await _container.DeleteItemAsync<User>(userId, new PartitionKey(partitionKey));
+                await _container.DeleteItemAsync<Domain.Entities.User>(userId, new PartitionKey(partitionKey));
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Delete failed: {ex.Message}");
             }
+        }
+
+        public Task<Domain.Entities.User?> GetByIdAsync(string id)
+        {
+            throw new NotImplementedException();
         }
     }
 }
