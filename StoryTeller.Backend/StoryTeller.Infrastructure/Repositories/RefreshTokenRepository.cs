@@ -24,7 +24,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
         public async Task<RefreshToken> GetByTokenAsync(string hashedToken)
         {
             var query = new QueryDefinition("SELECT * FROM c WHERE c.token = @token")
-                .WithParameter("@token", token);
+                .WithParameter("@token", hashedToken);
 
             var iterator = _container.GetItemQueryIterator<RefreshToken>(query);
             while(iterator.HasMoreResults)

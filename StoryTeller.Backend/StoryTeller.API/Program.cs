@@ -16,7 +16,7 @@ builder.Services.AddSwaggerGen();
 
 
 
-builder.Services.AddScoped<AuthServices, AuthService>();
+builder.Services.AddScoped<AuthServices, AuthServices>();
 builder.Services.AddScoped<IUserRepository, UserRepository>(); // Your Cosmos repo
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
