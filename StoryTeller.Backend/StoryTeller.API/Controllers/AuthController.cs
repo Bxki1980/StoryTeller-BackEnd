@@ -96,5 +96,13 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
             });
         }
 
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] RefreshRequestDto dto)
+        {
+            await _authService.LogoutAsync(dto);
+            return NoContent();
+        }
+
+
     }
 }

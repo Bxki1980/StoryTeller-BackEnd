@@ -21,7 +21,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
            await _container.CreateItemAsync(token, new PartitionKey(token.UserId));
         }
 
-        public async Task<RefreshToken> GetByTokenAsync(string token)
+        public async Task<RefreshToken> GetByTokenAsync(string hashedToken)
         {
             var query = new QueryDefinition("SELECT * FROM c WHERE c.token = @token")
                 .WithParameter("@token", token);

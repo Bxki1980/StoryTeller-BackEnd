@@ -101,6 +101,48 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
             };
         }
 
+        public async Task<AuthResponseDto> RefreshTokenAsync(RefreshRequestDto dto) 
+        {
+            var user = await _userRepository.GetByEmailAsync(dto.Email);
+            if (user == null) throw new Exception("User not found");
+
+            var tokenHash = _tokenService.HashToken(dto.RefreshToken);
+            var storedToken = await _refreshTokenRepo.GetByTokenAsync(tokenHash);
+
+            if ( storedToken == null || storedToken.UserId != user.Id || storedToken.Expires < DateTime.UtcNow || storedToken.Revoked)
+            {
+                throw new Exception("Invalid or expired refresh token");
+            }
+
+            // Revoke old token
+            await _refreshTokenRepo.InvalidateAsync(storedToken.Token);
+
+            // Generate new refresh token
+            var newRefreshToken = new RefreshToken
+            {
+                Token = _tokenService.GenerateRefreshToken(),
+                UserId = user.Id,
+                Expires = DateTime.UtcNow.AddDays(7),
+            };
+
+            newRefreshToken.Token = _tokenService.HashToken(newRefreshToken.Token); // hash before saving
+            await _refreshTokenRepo.CreateAsync(newRefreshToken);
+
+            return new AuthResponseDto
+            {
+                Email = user.Email,
+                Role = user.Role.ToString(),
+                Token = _tokenGenerator.GenerateToken(user),
+                RefreshToken = newRefreshToken.Token, // hashed version returned — or return original before hashing
+            };
+        }
+
+
+        public async Task LogoutAsync(RefreshRequestDto dto)
+        {
+            var tokenHash = _tokenService.HashToken(dto.RefreshToken);
+            await _refreshTokenRepo.InvalidateAsync(tokenHash);
+        }
 
 
     }
