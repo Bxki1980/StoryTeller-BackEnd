@@ -18,7 +18,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
 
         public async Task CreateAsync(RefreshToken token)
         {
-           await _container.CreateItemAsync(token, new PartitionKey(token.UserId));
+           await _container.CreateItemAsync(token, new PartitionKey(token.Id));
         }
 
         public async Task<RefreshToken> GetByTokenAsync(string hashedToken)

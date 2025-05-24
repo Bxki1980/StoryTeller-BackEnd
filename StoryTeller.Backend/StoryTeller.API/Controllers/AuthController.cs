@@ -27,27 +27,33 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
         private readonly IRefreshTokenRepository _refreshTokenRepo;
         private readonly TokenService _tokenService;
         private readonly JwtTokenGenerator _tokenGenerator;
-        private readonly AuthServices _authServices;
 
 
 
-        public AuthController(IAuthServices authService, ILoggerManager logger, IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepo, TokenService tokenService, JwtTokenGenerator tokenGenerator, AuthServices authServices)
+        public AuthController(IAuthServices authService, ILoggerManager logger, IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepo, TokenService tokenService, JwtTokenGenerator tokenGenerator)
         {
-            _authService = authService;
             _logger = logger;
             _userRepository = userRepository;
             _refreshTokenRepo = refreshTokenRepo;
             _tokenService = tokenService;
             _tokenGenerator = tokenGenerator;
-            _authServices = authServices;
+            _authService = authService;
         }
 
         [HttpPost("signup")]
         public async Task<IActionResult> SignUp(UserSignupDto dto)
         {
-            var result = await _authService.RegisterAsync(dto);
-            _logger.LogInfo($"User {dto.Email} signed up.");
-            return Ok(result);
+            try
+            {
+                var result = await _authService.RegisterAsync(dto);
+                _logger.LogInfo($"User {dto.Email} signed up.");
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Signup failed: {ex.Message}");
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
 
@@ -118,13 +124,11 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
     {
 
 
-        private readonly IAuthServices _authService;
         private readonly ILoggerManager _logger;
         private readonly IUserRepository _userRepository;
         private readonly IRefreshTokenRepository _refreshTokenRepo;
         private readonly TokenService _tokenService;
         private readonly JwtTokenGenerator _tokenGenerator;
-        private readonly AuthServices _authServices;
 
 
         public GoogleLoginController(IUserRepository userRepo, ILoggerManager logger)

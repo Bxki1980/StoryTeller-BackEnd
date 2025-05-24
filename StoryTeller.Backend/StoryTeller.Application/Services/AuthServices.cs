@@ -69,36 +69,44 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
 
         public async Task<AuthResponseDto> LoginAsync(UserLoginDto dto)
         {
-            var user = await _userRepository.GetByEmailAsync(dto.Email);
-            if (user == null)
+            try
             {
-                throw new Exception("User not found");
+                var user = await _userRepository.GetByEmailAsync(dto.Email);
+                if (user == null)
+                {
+                    throw new Exception("User not found");
+                }
+
+                var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
+                if (result == PasswordVerificationResult.Failed)
+                {
+                    throw new Exception("Invalid credentials");
+                }
+
+                // Generate refresh token
+                var refreshToken = new RefreshToken
+                {
+                    UserId = user.Id,
+                    Token = _tokenService.GenerateRefreshToken(),
+                    Expires = DateTime.UtcNow.AddDays(7),
+                };
+                await _refreshTokenRepo.CreateAsync(refreshToken);
+
+                _logger.LogInfo($"User logged in: {user.Email}");
+
+                return new AuthResponseDto
+                {
+                    Email = user.Email,
+                    Role = user.Role.ToString(),
+                    Token = _tokenGenerator.GenerateToken(user),
+                    RefreshToken = refreshToken.Token,
+                };
             }
-
-            var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
-            if (result == PasswordVerificationResult.Failed)
+            catch (Exception ex)
             {
-                throw new Exception("Invalid credentials");
+                _logger.LogError($"Login failed for {dto.Email}: {ex.Message}");
+                throw; 
             }
-
-            // Generate refresh token
-            var refreshToken = new RefreshToken
-            {
-                Token = _tokenService.GenerateRefreshToken(),
-                UserId = user.Id,
-                Expires = DateTime.UtcNow.AddDays(7),
-            };
-            await _refreshTokenRepo.CreateAsync(refreshToken);
-
-            _logger.LogInfo($"User logged in: {user.Email}");
-
-            return new AuthResponseDto
-            {
-                Email = user.Email,
-                Role = user.Role.ToString(),
-                Token = _tokenGenerator.GenerateToken(user),
-                RefreshToken = refreshToken.Token,
-            };
         }
 
         public async Task<AuthResponseDto> RefreshTokenAsync(RefreshRequestDto dto) 

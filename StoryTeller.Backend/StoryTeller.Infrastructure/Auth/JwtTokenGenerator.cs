@@ -28,8 +28,11 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth
             var Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var creds = new SigningCredentials(Key, SecurityAlgorithms.HmacSha256);
 
-            var expiryMinutes = int.Parse(_config["Jwt:ExpiresInMinutes"]);
-            var expiration = DateTime.UtcNow.AddMinutes(expiryMinutes);
+            var expiryMinutes = _config["Jwt:ExpiresInMinutes"];
+            if (string.IsNullOrEmpty(expiryMinutes)) {
+                throw new Exception("Jwt:ExpiresInMinutes is missing in configuration");
+            }
+            var expiration = DateTime.UtcNow.AddMinutes(int.Parse(expiryMinutes));
 
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
