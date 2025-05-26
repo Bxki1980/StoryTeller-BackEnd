@@ -21,10 +21,11 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IAuthServices, AuthServices>();
 builder.Services.AddScoped<IUserRepository, UserRepository>(); // Your Cosmos repo
-builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
+builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<JwtTokenGenerator>();
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 
 
 
