@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Auth;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Common;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
@@ -61,7 +63,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
                 return Unauthorized("Google login failed");
 
             var response = await _googleAuthService.HandleGoogleCallbackAsync(result.Principal);
-            return Ok(response);
+            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(response));
         }
 
 
@@ -69,7 +71,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
         public async Task<IActionResult> GoogleSignInWithToken([FromBody] string idToken)
         {
             var response = await _googleAuthService.HandleGoogleSignInTokenAsync(idToken);
-            return Ok(response);
+            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(response));
         }
     }
 }

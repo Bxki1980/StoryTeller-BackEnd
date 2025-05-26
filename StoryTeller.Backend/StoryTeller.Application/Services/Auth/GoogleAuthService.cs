@@ -5,6 +5,8 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Setting;
+using Microsoft.Extensions.Options;
 
 public class GoogleAuthService : IGoogleAuthService
 {
@@ -14,6 +16,7 @@ public class GoogleAuthService : IGoogleAuthService
     private readonly TokenService _tokenService;
     private readonly JwtTokenGenerator _tokenGenerator;
     private readonly ILoggerManager _logger;
+    private readonly JwtSettings _jwtSettings;
 
     public GoogleAuthService(
         IGoogleClaimsParser claimsParser,
@@ -21,7 +24,9 @@ public class GoogleAuthService : IGoogleAuthService
         IRefreshTokenRepository refreshTokenRepo,
         TokenService tokenService,
         JwtTokenGenerator tokenGenerator,
-        ILoggerManager logger)
+        ILoggerManager logger,
+        IOptions<JwtSettings> options
+        )
     {
         _claimsParser = claimsParser;
         _userRepository = userRepository;
@@ -29,6 +34,7 @@ public class GoogleAuthService : IGoogleAuthService
         _tokenService = tokenService;
         _tokenGenerator = tokenGenerator;
         _logger = logger;
+        _jwtSettings = options.Value;
     }
 
     public async Task<AuthResponseDto> HandleGoogleCallbackAsync(ClaimsPrincipal principal)
@@ -98,7 +104,7 @@ public class GoogleAuthService : IGoogleAuthService
         {
             Token = _tokenService.GenerateRefreshToken(),
             UserId = user.Id,
-            Expires = DateTime.UtcNow.AddDays(7)
+            Expires = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays)
         };
 
         refreshToken.Token = _tokenService.HashToken(refreshToken.Token);

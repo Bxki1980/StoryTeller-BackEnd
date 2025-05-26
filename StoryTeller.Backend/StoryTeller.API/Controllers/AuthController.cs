@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Auth;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Common;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
 
@@ -24,7 +25,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
         {
             var result = await _authService.RegisterAsync(dto);
             _logger.LogInfo($"User {dto.Email} signed up.");
-            return Ok(result);
+            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result));
         }
 
         [HttpPost("login")]
@@ -32,7 +33,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
         {
             var result = await _authService.LoginAsync(dto);
             _logger.LogInfo($"User {dto.Email} logged in.");
-            return Ok(result);
+            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result));
         }
 
         [Authorize]
@@ -41,7 +42,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
         {
             var result = await _authService.RefreshTokenAsync(dto);
             _logger.LogInfo($"Token refreshed for {dto.Email}.");
-            return Ok(result);
+            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result));
         }
 
         [Authorize]
