@@ -8,6 +8,7 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositories;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Logger;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Setting;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,7 @@ builder.Services.AddScoped<IAuthServices, AuthServices>();
 builder.Services.AddScoped<IUserRepository, UserRepository>(); // Your Cosmos repo
 builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IUnitOfWork, CosmosUnitOfWork>();
 builder.Services.AddScoped<JwtTokenGenerator>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
@@ -61,6 +63,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             )
         };
     });
+
+
+builder.Services.AddOptions<JwtSettings>()
+    .Bind(builder.Configuration.GetSection("Jwt"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart(); // optional but recommended (validates at startup)
+
 
 // Google Authentication
 builder.Services.AddAuthentication(options =>

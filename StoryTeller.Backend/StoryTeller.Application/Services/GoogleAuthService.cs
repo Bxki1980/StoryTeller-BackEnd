@@ -6,6 +6,7 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Enums;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Setting;
 using System.Security.Claims;
 
 public class GoogleAuthService : IGoogleAuthService
@@ -15,7 +16,8 @@ public class GoogleAuthService : IGoogleAuthService
     private readonly TokenService _tokenService;
     private readonly JwtTokenGenerator _tokenGenerator;
     private readonly IMapper _mapper;
-    private readonly int _refreshTokenExpiryDays;
+    private readonly JwtSettings _jwtSettings;
+
 
     public GoogleAuthService(
         IUserRepository userRepo,

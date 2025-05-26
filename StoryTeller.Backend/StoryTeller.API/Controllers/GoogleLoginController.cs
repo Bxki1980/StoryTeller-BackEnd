@@ -19,7 +19,6 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
         private readonly TokenService _tokenService;
         private readonly JwtTokenGenerator _tokenGenerator;
         private readonly IMapper _mapper;
-        private readonly int _refreshTokenExpiryDays;
         private readonly IGoogleAuthService _googleAuthService;
 
         public GoogleLoginController(
@@ -39,7 +38,6 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
             _tokenGenerator = tokenGenerator;
             _mapper = mapper;
             _googleAuthService = googleAuthService;
-            _refreshTokenExpiryDays = int.TryParse(config["Jwt:RefreshTokenExpiryDays"], out var days) ? days : 7;
         }
 
         [HttpGet("google-login")]

@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+using StoryTeller.Shared.Exceptions;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Exceptions;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Setting;
 using System.Security.Authentication;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
@@ -19,11 +22,21 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
         private readonly JwtTokenGenerator _tokenGenerator;
         private readonly TokenService _tokenService;
         private readonly IRefreshTokenRepository _refreshTokenRepo;
-        private readonly int _refreshTokenExpiryDays;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly JwtSettings _jwtSettings;
 
 
 
-        public AuthServices(IMapper mapper, IConfiguration config, ILoggerManager logger, IUserRepository userRepository, JwtTokenGenerator tokenGenerator, TokenService tokenService, IRefreshTokenRepository refreshTokenRepo)
+        public AuthServices(
+            IMapper mapper, 
+            IConfiguration config, 
+            ILoggerManager logger, 
+            IUserRepository userRepository, 
+            JwtTokenGenerator tokenGenerator, 
+            TokenService tokenService, 
+            IRefreshTokenRepository refreshTokenRepo, 
+            IUnitOfWork unitOfWork,
+            IOptions<JwtSettings> options)
         {
             _mapper = mapper;
             _config = config;
@@ -33,41 +46,37 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
             _tokenGenerator = tokenGenerator;
             _tokenService = tokenService;
             _refreshTokenRepo = refreshTokenRepo;
-            _refreshTokenExpiryDays = int.TryParse(_config["Jwt:RefreshTokenExpiryDays"], out var days) ? days : 7;
+            _unitOfWork = unitOfWork;
+            _jwtSettings = options.Value;
         }
 
 
         public async Task<AuthResponseDto> RegisterAsync(UserSignupDto dto)
         {
-            // Check if the user already exists
-            var exisitingUser = await _userRepository.GetByEmailAsync(dto.Email);
-            if ( exisitingUser != null)
-            {
-                throw new UserAlreadyExistsException(dto.Email);
-            }
+            var existingUser = await _userRepository.GetByEmailAsync(dto.Email);
+            if (existingUser != null)
+                throw new ConflictException("User already exists");
 
             var user = _mapper.Map<User>(dto);
             user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
-
-            await _userRepository.CreateAsync(user);
-
-            _logger.LogInfo($"User registered {user.Email}");
 
             var refreshToken = new RefreshToken
             {
                 Token = _tokenService.GenerateRefreshToken(),
                 UserId = user.Id,
-                Expires = DateTime.UtcNow.AddDays(_refreshTokenExpiryDays)
+                Expires = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
             };
-            await _refreshTokenRepo.CreateAsync(refreshToken);
+
+            var success = await _unitOfWork.CommitUserWithTokenAsync(user, refreshToken);
+            if (!success)
+                throw new Exception("Failed to register user");
 
             return new AuthResponseDto
             {
                 Email = user.Email,
                 Role = user.Role.ToString(),
                 Token = _tokenGenerator.GenerateToken(user),
-                RefreshToken = refreshToken.Token,
-
+                RefreshToken = refreshToken.Token
             };
         }
 
@@ -92,7 +101,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
                 {
                     UserId = user.Id,
                     Token = _tokenService.GenerateRefreshToken(),
-                    Expires = DateTime.UtcNow.AddDays(_refreshTokenExpiryDays),
+                    Expires = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
                 };
                 await _refreshTokenRepo.CreateAsync(refreshToken);
 
@@ -136,7 +145,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
             {
                 Token = _tokenService.GenerateRefreshToken(),
                 UserId = user.Id,
-                Expires = DateTime.UtcNow.AddDays(_refreshTokenExpiryDays),
+                Expires = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
             };
 
             newRefreshToken.Token = _tokenService.HashToken(newRefreshToken.Token); // hash before saving

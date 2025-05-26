@@ -3,17 +3,19 @@ using System.IdentityModel.Tokens.Jwt;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 using System.Security.Claims;
 using System.Text;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Setting;
+using Microsoft.Extensions.Options;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth
 
 {
     public class JwtTokenGenerator
     {
-        private readonly IConfiguration _config;
+        private readonly JwtSettings _jwtSettings;
 
-        public JwtTokenGenerator(IConfiguration config)
+        public JwtTokenGenerator(IOptions<JwtSettings> options)
         {
-            _config = config;
+            _jwtSettings = options.Value;
         }
 
         public string GenerateToken(User user)
@@ -25,18 +27,18 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth
                     new Claim(ClaimTypes.NameIdentifier, user.Id)
                 };
 
-            var Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
             var creds = new SigningCredentials(Key, SecurityAlgorithms.HmacSha256);
 
-            var expiryMinutes = _config["Jwt:ExpiresInMinutes"];
-            if (string.IsNullOrEmpty(expiryMinutes)) {
+            var expiryMinutes = _jwtSettings.ExpiresInMinutes;
+            if (expiryMinutes <= 0) {
                 throw new Exception("Jwt:ExpiresInMinutes is missing in configuration");
             }
-            var expiration = DateTime.UtcNow.AddMinutes(int.Parse(expiryMinutes));
+            var expiration = DateTime.UtcNow.AddMinutes(expiryMinutes);
 
             var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
+                issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
                 claims: claims,
                 expires: expiration,
                 signingCredentials: creds
