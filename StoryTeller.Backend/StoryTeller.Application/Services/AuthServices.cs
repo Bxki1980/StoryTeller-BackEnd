@@ -17,6 +17,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
         private readonly JwtTokenGenerator _tokenGenerator;
         private readonly TokenService _tokenService;
         private readonly IRefreshTokenRepository _refreshTokenRepo;
+        private readonly int _refreshTokenExpiryDays;
 
 
 
@@ -30,6 +31,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
             _tokenGenerator = tokenGenerator;
             _tokenService = tokenService;
             _refreshTokenRepo = refreshTokenRepo;
+            _refreshTokenExpiryDays = int.TryParse(_config["Jwt:RefreshTokenExpiryDays"], out var days) ? days : 7;
         }
 
 
@@ -53,7 +55,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
             {
                 Token = _tokenService.GenerateRefreshToken(),
                 UserId = user.Id,
-                Expires = DateTime.UtcNow.AddDays(7)
+                Expires = DateTime.UtcNow.AddDays(_refreshTokenExpiryDays)
             };
             await _refreshTokenRepo.CreateAsync(refreshToken);
 
@@ -88,7 +90,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
                 {
                     UserId = user.Id,
                     Token = _tokenService.GenerateRefreshToken(),
-                    Expires = DateTime.UtcNow.AddDays(7),
+                    Expires = DateTime.UtcNow.AddDays(_refreshTokenExpiryDays),
                 };
                 await _refreshTokenRepo.CreateAsync(refreshToken);
 
@@ -125,12 +127,14 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
             // Revoke old token
             await _refreshTokenRepo.InvalidateAsync(storedToken.Token);
 
+
+
             // Generate new refresh token
             var newRefreshToken = new RefreshToken
             {
                 Token = _tokenService.GenerateRefreshToken(),
                 UserId = user.Id,
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.UtcNow.AddDays(_refreshTokenExpiryDays),
             };
 
             newRefreshToken.Token = _tokenService.HashToken(newRefreshToken.Token); // hash before saving
