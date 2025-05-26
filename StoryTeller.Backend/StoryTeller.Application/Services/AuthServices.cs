@@ -4,6 +4,8 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Exceptions;
+using System.Security.Authentication;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
 {
@@ -41,7 +43,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
             var exisitingUser = await _userRepository.GetByEmailAsync(dto.Email);
             if ( exisitingUser != null)
             {
-                throw new Exception("User already exist. ");
+                throw new UserAlreadyExistsException(dto.Email);
             }
 
             var user = _mapper.Map<User>(dto);
@@ -76,13 +78,13 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
                 var user = await _userRepository.GetByEmailAsync(dto.Email);
                 if (user == null)
                 {
-                    throw new Exception("User not found");
+                    throw new UserNotFoundException(dto.Email);
                 }
 
                 var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
                 if (result == PasswordVerificationResult.Failed)
                 {
-                    throw new Exception("Invalid credentials");
+                    throw new InvalidCredentialsException();
                 }
 
                 // Generate refresh token
@@ -114,14 +116,14 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
         public async Task<AuthResponseDto> RefreshTokenAsync(RefreshRequestDto dto) 
         {
             var user = await _userRepository.GetByEmailAsync(dto.Email);
-            if (user == null) throw new Exception("User not found");
+            if (user == null) throw new UserAlreadyExistsException(dto.Email);
 
             var tokenHash = _tokenService.HashToken(dto.RefreshToken);
             var storedToken = await _refreshTokenRepo.GetByTokenAsync(tokenHash);
 
             if ( storedToken == null || storedToken.UserId != user.Id || storedToken.Expires < DateTime.UtcNow || storedToken.Revoked)
             {
-                throw new Exception("Invalid or expired refresh token");
+                throw new InvalidRefreshTokenException();
             }
 
             // Revoke old token

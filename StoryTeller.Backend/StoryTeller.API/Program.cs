@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using StoryTeller.StoryTeller.Backend.StoryTeller.API.Middlewares;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
@@ -85,6 +86,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

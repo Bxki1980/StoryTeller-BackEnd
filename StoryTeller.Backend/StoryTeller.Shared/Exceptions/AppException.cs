@@ -10,5 +10,4 @@
             StatusCode = statusCode;
         }
     }
-
 }

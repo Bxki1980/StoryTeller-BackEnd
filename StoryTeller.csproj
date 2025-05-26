@@ -32,7 +32,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="StoryTeller.Backend\StoryTeller.API\Middlewares\" />
     <Folder Include="StoryTeller.Backend\StoryTeller.API\Filters\" />
     <Folder Include="StoryTeller.Backend\StoryTeller.Application\Constants\" />
     <Folder Include="StoryTeller.Backend\StoryTeller.Application\Helpers\" />
