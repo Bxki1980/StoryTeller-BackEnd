@@ -4,7 +4,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Setting
 {
     public class JwtSettings
     {
-        [Required]
+        [Required(ErrorMessage = "The Secret field is required.")]
         public string Secret { get; set; }
 
         [Required]

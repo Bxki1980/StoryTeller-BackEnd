@@ -11,6 +11,8 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Services.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Logger;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Setting;
 using System.Text;
+using Microsoft.Azure.Cosmos;
+
 
 var builder = WebApplication.CreateBuilder(args);
 //this line to retrieve the configuration object
@@ -21,6 +23,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+builder.Services.AddSingleton<CosmosClient>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    return StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Database.CosmosDbFactory.CreateClient(config);
+});
 
 
 builder.Services.AddScoped<IAuthServices, AuthServices>();
