@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
+namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth
 {
     public class TokenService
     {

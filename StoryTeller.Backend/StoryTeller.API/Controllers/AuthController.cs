@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
@@ -34,6 +35,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
             return Ok(result);
         }
 
+        [Authorize]
         [HttpPost("refresh")]
         public async Task<IActionResult> RefreshToken(RefreshRequestDto dto)
         {
@@ -42,6 +44,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
             return Ok(result);
         }
 
+        [Authorize]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout(RefreshRequestDto dto)
         {

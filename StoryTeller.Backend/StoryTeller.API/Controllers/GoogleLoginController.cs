@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
@@ -20,6 +20,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
         private readonly JwtTokenGenerator _tokenGenerator;
         private readonly IMapper _mapper;
         private readonly IGoogleAuthService _googleAuthService;
+        private readonly IGoogleClaimsParser _claimsParser;
 
         public GoogleLoginController(
             ILoggerManager logger,
@@ -29,7 +30,8 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
             TokenService tokenService,
             JwtTokenGenerator tokenGenerator,
             IMapper mapper,
-            IConfiguration config)
+            IConfiguration config,
+            IGoogleClaimsParser claimsParser)
         {
             _logger = logger;
             _userRepository = userRepository;
@@ -38,6 +40,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
             _tokenGenerator = tokenGenerator;
             _mapper = mapper;
             _googleAuthService = googleAuthService;
+            _claimsParser = claimsParser;
         }
 
         [HttpGet("google-login")]
@@ -60,6 +63,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
             var response = await _googleAuthService.HandleGoogleCallbackAsync(result.Principal);
             return Ok(response);
         }
+
 
         [HttpPost("google-signin-token")]
         public async Task<IActionResult> GoogleSignInWithToken([FromBody] string idToken)

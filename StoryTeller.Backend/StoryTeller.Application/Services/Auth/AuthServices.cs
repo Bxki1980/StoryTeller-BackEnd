@@ -10,7 +10,7 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Exceptions;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Setting;
 using System.Security.Authentication;
 
-namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services
+namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth
 {
     public class AuthServices : IAuthServices
     {

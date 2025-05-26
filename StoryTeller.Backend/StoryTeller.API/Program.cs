@@ -4,14 +4,17 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using StoryTeller.StoryTeller.Backend.StoryTeller.API.Middlewares;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositories;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Services.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Logger;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Setting;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+//this line to retrieve the configuration object
+var config = builder.Configuration;
 
 // Register services before Build
 builder.Services.AddControllers();
@@ -24,6 +27,7 @@ builder.Services.AddScoped<IAuthServices, AuthServices>();
 builder.Services.AddScoped<IUserRepository, UserRepository>(); // Your Cosmos repo
 builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IGoogleClaimsParser, GoogleClaimsParser>();
 builder.Services.AddScoped<IUnitOfWork, CosmosUnitOfWork>();
 builder.Services.AddScoped<JwtTokenGenerator>();
 builder.Services.AddScoped<TokenService>();
@@ -47,8 +51,9 @@ builder.Services.AddCors(options =>
 });
 
 // JWT Authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+builder.Services
+    .AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -56,13 +61,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidIssuer = config["Jwt:Issuer"],
+            ValidAudience = config["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
-            )
+                Encoding.UTF8.GetBytes(config["Jwt:Key"]))
         };
     });
+
+builder.Services.AddAuthorization();
 
 
 builder.Services.AddOptions<JwtSettings>()
