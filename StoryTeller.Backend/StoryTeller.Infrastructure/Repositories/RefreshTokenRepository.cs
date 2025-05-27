@@ -13,7 +13,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
         {
             var client = new CosmosClient(config["Cosmos:ConnectionString"]);
             var database = client.GetDatabase(config["Cosmos:DatabaseName"]);
-            _container = database.GetContainer(config["Cosmos:UserContainer"]);
+            _container = database.GetContainer(config["Cosmos:RefreshTokenContainer"]);
         }
 
         public async Task CreateAsync(RefreshToken token)

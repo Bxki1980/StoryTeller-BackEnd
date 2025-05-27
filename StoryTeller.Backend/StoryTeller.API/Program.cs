@@ -37,12 +37,13 @@ builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 builder.Services.AddScoped<IGoogleClaimsParser, GoogleClaimsParser>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IGoogleClaimsParser, GoogleClaimsParser>();
-builder.Services.AddScoped<IUnitOfWork, CosmosUnitOfWork>();
 builder.Services.AddScoped<JwtTokenGenerator>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 
 
+Console.WriteLine($"Cosmos DB: {builder.Configuration["Cosmos:Database"]}");
+Console.WriteLine($"Cosmos Container: {builder.Configuration["Cosmos:UserContainer"]}");
 
 
 // AutoMapper
@@ -121,3 +122,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+

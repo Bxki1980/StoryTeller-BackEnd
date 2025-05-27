@@ -22,7 +22,6 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth
         private readonly JwtTokenGenerator _tokenGenerator;
         private readonly TokenService _tokenService;
         private readonly IRefreshTokenRepository _refreshTokenRepo;
-        private readonly IUnitOfWork _unitOfWork;
         private readonly JwtSettings _jwtSettings;
 
 
@@ -35,7 +34,6 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth
             JwtTokenGenerator tokenGenerator, 
             TokenService tokenService, 
             IRefreshTokenRepository refreshTokenRepo, 
-            IUnitOfWork unitOfWork,
             IOptions<JwtSettings> options)
         {
             _mapper = mapper;
@@ -46,7 +44,6 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth
             _tokenGenerator = tokenGenerator;
             _tokenService = tokenService;
             _refreshTokenRepo = refreshTokenRepo;
-            _unitOfWork = unitOfWork;
             _jwtSettings = options.Value;
         }
 
@@ -58,18 +55,27 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth
                 throw new ConflictException("User already exists");
 
             var user = _mapper.Map<User>(dto);
+            user.Id = Guid.NewGuid().ToString();
             user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
 
             var refreshToken = new RefreshToken
             {
-                Token = _tokenService.GenerateRefreshToken(),
+                Id = Guid.NewGuid().ToString(),
                 UserId = user.Id,
-                Expires = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
+                Token = _tokenService.GenerateRefreshToken(),
+                Expires = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays)
             };
 
-            var success = await _unitOfWork.CommitUserWithTokenAsync(user, refreshToken);
-            if (!success)
+            try
+            {
+                await _userRepository.CreateAsync(user);
+                await _refreshTokenRepo.CreateAsync(refreshToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error registering user {user.Email}: {ex.Message}");
                 throw new Exception("Failed to register user");
+            }
 
             return new AuthResponseDto
             {
@@ -79,6 +85,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth
                 RefreshToken = refreshToken.Token
             };
         }
+
 
         public async Task<AuthResponseDto> LoginAsync(UserLoginDto dto)
         {
