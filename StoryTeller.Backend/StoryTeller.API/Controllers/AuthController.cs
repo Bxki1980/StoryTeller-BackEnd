@@ -29,7 +29,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(UserLoginDto dto)
+        public async Task<IActionResult> Login([FromBody] UserLoginDto dto)
         {
             var result = await _authService.LoginAsync(dto);
             _logger.LogInfo($"User {dto.Email} logged in.");
