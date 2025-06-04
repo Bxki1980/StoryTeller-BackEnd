@@ -361,3 +361,22 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+
+# Ignore Visual Studio user settings
+*.user
+
+# Ignore local dev config
+Properties/launchSettings.json
+
+# Ignore secrets and certificates
+*.secret.json
+*.pfx
+
+# Ignore build outputs
+bin/
+obj/
+
+
+# Ignore local app settings
+StoryTeller.Backend/StoryTeller.API/appsettings.json

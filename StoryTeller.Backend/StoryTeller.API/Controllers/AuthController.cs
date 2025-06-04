@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Common;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
 {
@@ -31,6 +30,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDto dto)
         {
+            _logger.LogInfo($"Login DTO received: Email = {dto.Email}, Password = {dto.Password}");
             var result = await _authService.LoginAsync(dto);
             _logger.LogInfo($"User {dto.Email} logged in.");
             return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result));

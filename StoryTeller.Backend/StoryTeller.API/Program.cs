@@ -100,9 +100,12 @@ builder.Services.AddAuthentication(options =>
     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 });
 
-
+builder.WebHost.UseUrls("http://0.0.0.0:5224"); // enables access from LAN
 
 var app = builder.Build();
+
+
+
 
 // Middlewares
 app.UseCors("AllowAll");
