@@ -100,7 +100,10 @@ builder.Services.AddAuthentication(options =>
     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 });
 
-builder.WebHost.UseUrls("http://0.0.0.0:5224"); // enables access from LAN
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5224); // for HTTP
+});
 
 var app = builder.Build();
 
