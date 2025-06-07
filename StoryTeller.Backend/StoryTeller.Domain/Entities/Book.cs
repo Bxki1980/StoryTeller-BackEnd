@@ -2,7 +2,7 @@
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities
 {
-    public class Story
+    public class Book
     {
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public string BookId { get; set; } = string.Empty;
