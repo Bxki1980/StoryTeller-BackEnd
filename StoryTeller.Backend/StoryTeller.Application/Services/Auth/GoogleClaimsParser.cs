@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Auth;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Services.Auth
 {

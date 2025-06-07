@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using StoryTeller.StoryTeller.Backend.StoryTeller.API.Middlewares;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
@@ -12,6 +11,8 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Logger;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Setting;
 using System.Text;
 using Microsoft.Azure.Cosmos;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +33,7 @@ builder.Services.AddSingleton<CosmosClient>(sp =>
 
 
 builder.Services.AddScoped<IAuthServices, AuthServices>();
+builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>(); // Your Cosmos repo
 builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 builder.Services.AddScoped<IGoogleClaimsParser, GoogleClaimsParser>();
