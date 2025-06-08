@@ -9,10 +9,15 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
     {
         private readonly Container _container;
 
+
         public PageRepository(CosmosClient cosmosClient, IConfiguration config)
         {
-            var databaseId = config["CosmosDb:DatabaseId"];
-            var containerId = config["CosmosDb:PagesContainerId"];
+            var databaseId = config["Cosmos:DatabaseName"]
+                ?? throw new InvalidOperationException("Missing Cosmos:DatabaseName in configuration");
+
+            var containerId = config["Cosmos:PagesContainerId"]
+                ?? throw new InvalidOperationException("Missing Cosmos:PagesContainerId in configuration");
+
             _container = cosmosClient.GetContainer(databaseId, containerId);
         }
 

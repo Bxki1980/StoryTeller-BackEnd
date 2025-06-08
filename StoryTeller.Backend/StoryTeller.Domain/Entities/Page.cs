@@ -1,7 +1,10 @@
-﻿namespace StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities
+﻿using System.Text.Json.Serialization;
+
+namespace StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities
 {
     public class Page
     {
+        [JsonPropertyName("id")] 
         public string Id { get; set; } = string.Empty;         
         public string BookId { get; set; } = string.Empty;
 
