@@ -140,6 +140,7 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();
