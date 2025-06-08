@@ -4,10 +4,10 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Rep
 {
     public interface IBookRepository
     {
-        Task<Book?> GetByBookIdAsync(string bookId);
-        Task<List<Book>> GetAllAsync();
-        Task CreateAsync(Book book);
-        Task UpdateAsync(Book book);
+        Task<StoryTeller.Domain.Entities.Book?> GetByBookIdAsync(string bookId);
+        Task<List<StoryTeller.Domain.Entities.Book>> GetAllAsync();
+        Task CreateAsync(StoryTeller.Domain.Entities.Book book);
+        Task UpdateAsync(StoryTeller.Domain.Entities.Book book);
         Task DeleteAsync(string bookId);
     }
 }
