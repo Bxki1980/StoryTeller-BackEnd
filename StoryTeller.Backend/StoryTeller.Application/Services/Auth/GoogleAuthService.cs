@@ -7,8 +7,8 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Setting;
 using Microsoft.Extensions.Options;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Auth;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Auth;
 
 public class GoogleAuthService : IGoogleAuthService
 {

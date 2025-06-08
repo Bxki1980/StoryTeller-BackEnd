@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Common;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Auth;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
 

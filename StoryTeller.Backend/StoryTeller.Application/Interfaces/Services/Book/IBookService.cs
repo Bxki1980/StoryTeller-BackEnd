@@ -1,6 +1,6 @@
 ﻿using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
 
-namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services
+namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book
 {
     public interface IBookService
     {

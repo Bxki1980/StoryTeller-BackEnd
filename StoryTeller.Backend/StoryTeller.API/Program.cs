@@ -11,12 +11,14 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Logger;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Setting;
 using System.Text;
 using Microsoft.Azure.Cosmos;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Validators;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Auth;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Book;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Auth;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,6 +59,8 @@ builder.Services.AddScoped<IGoogleClaimsParser, GoogleClaimsParser>();
 builder.Services.AddScoped<JwtTokenGenerator>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
+builder.Services.AddScoped<IBlobUrlGenerator, BlobUrlGenerator>();
+
 
 
 Console.WriteLine($"Cosmos DB: {builder.Configuration["Cosmos:Database"]}");

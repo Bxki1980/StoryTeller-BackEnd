@@ -1,6 +1,6 @@
 ﻿using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 
-namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories
+namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Auth
 {
     public interface IRefreshTokenRepository
     {

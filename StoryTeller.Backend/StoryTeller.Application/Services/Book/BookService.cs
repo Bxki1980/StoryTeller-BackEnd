@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Book;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.Books
 {
