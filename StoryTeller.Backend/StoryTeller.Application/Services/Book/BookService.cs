@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
@@ -11,12 +12,15 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
         private readonly IBookRepository _bookRepository;
         private readonly IMapper _mapper;
         private readonly IBlobUrlGenerator _blobUrlGenerator;
+        private readonly ILogger<BookService> _logger;
 
-        public BookService(IBookRepository bookRepository, IMapper mapper, IBlobUrlGenerator blobUrlGenerator)
+
+        public BookService(IBookRepository bookRepository, IMapper mapper, IBlobUrlGenerator blobUrlGenerator, ILogger<BookService> logger)
         {
             _bookRepository = bookRepository;
             _mapper = mapper;
             _blobUrlGenerator = blobUrlGenerator;
+            _logger = logger;
         }
 
         public async Task<List<BookDto>> GetAllAsync()
