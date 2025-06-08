@@ -11,7 +11,7 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Service
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
 
-namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
+namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.auth
 {
     [ApiController]
     [Route("api/[controller]")]
