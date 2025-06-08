@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Common;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Auth;
 
-namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers
+namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.auth
 {
     [ApiController]
     [Route("api/[controller]")]

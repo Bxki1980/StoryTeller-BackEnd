@@ -4,6 +4,8 @@ using Microsoft.Extensions.Options;
 using StoryTeller.Shared.Exceptions;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Auth;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Exceptions;

@@ -1,5 +1,5 @@
 ﻿using Microsoft.Azure.Cosmos;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositories

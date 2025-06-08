@@ -2,7 +2,7 @@
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 using System.Security.Claims;
 
-namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces
+namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Auth
 {
     public interface IGoogleAuthService
     {

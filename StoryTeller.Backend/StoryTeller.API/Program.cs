@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using StoryTeller.StoryTeller.Backend.StoryTeller.API.Middlewares;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
@@ -12,6 +11,14 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Logger;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Setting;
 using System.Text;
 using Microsoft.Azure.Cosmos;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Validators;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Auth;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Book;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Auth;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +26,15 @@ var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
 // Register services before Build
-builder.Services.AddControllers();
+
+builder.Services
+    .AddFluentValidationAutoValidation()
+    .AddFluentValidationClientsideAdapters();
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateBookDtoValidator>();
+
+builder.Services.AddControllers(); 
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -32,6 +47,10 @@ builder.Services.AddSingleton<CosmosClient>(sp =>
 
 
 builder.Services.AddScoped<IAuthServices, AuthServices>();
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IPageRepository, PageRepository>();
+builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<IPageService, PageService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>(); // Your Cosmos repo
 builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 builder.Services.AddScoped<IGoogleClaimsParser, GoogleClaimsParser>();
@@ -40,6 +59,8 @@ builder.Services.AddScoped<IGoogleClaimsParser, GoogleClaimsParser>();
 builder.Services.AddScoped<JwtTokenGenerator>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
+builder.Services.AddScoped<IBlobUrlGenerator, BlobUrlGenerator>();
+
 
 
 Console.WriteLine($"Cosmos DB: {builder.Configuration["Cosmos:Database"]}");
@@ -123,6 +144,7 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();
