@@ -14,6 +14,9 @@ using Microsoft.Azure.Cosmos;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Validators;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,7 +24,15 @@ var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
 // Register services before Build
-builder.Services.AddControllers();
+
+builder.Services
+    .AddFluentValidationAutoValidation()
+    .AddFluentValidationClientsideAdapters();
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateBookDtoValidator>();
+
+builder.Services.AddControllers(); 
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
