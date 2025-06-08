@@ -14,7 +14,6 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
         private readonly IBlobUrlGenerator _blobUrlGenerator;
         private readonly ILogger<BookService> _logger;
 
-
         public BookService(IBookRepository bookRepository, IMapper mapper, IBlobUrlGenerator blobUrlGenerator, ILogger<BookService> logger)
         {
             _bookRepository = bookRepository;
@@ -26,18 +25,25 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
         public async Task<List<BookDto>> GetAllAsync()
         {
             var books = await _bookRepository.GetAllAsync();
-            return books.Select(book =>
+            var dtos = books.Select(book =>
             {
                 var dto = _mapper.Map<BookDto>(book);
                 dto.CoverImageUrl = _blobUrlGenerator.GenerateSasUrl(book.CoverImageBlobPath);
                 return dto;
             }).ToList();
+
+            _logger.LogInformation("Fetched {Count} books", dtos.Count);
+            return dtos;
         }
 
         public async Task<BookDto?> GetByBookIdAsync(string bookId)
         {
             var book = await _bookRepository.GetByBookIdAsync(bookId);
-            if (book == null) return null;
+            if (book == null)
+            {
+                _logger.LogWarning("Book not found: {BookId}", bookId);
+                return null;
+            }
 
             var dto = _mapper.Map<BookDto>(book);
             dto.CoverImageUrl = _blobUrlGenerator.GenerateSasUrl(book.CoverImageBlobPath);
@@ -53,6 +59,8 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
             book.Version = "1.0.0";
 
             await _bookRepository.CreateAsync(book);
+            _logger.LogInformation("Book created successfully: {BookId}", book.BookId);
+
             var result = _mapper.Map<BookDto>(book);
             result.CoverImageUrl = _blobUrlGenerator.GenerateSasUrl(book.CoverImageBlobPath);
             return result;
@@ -61,12 +69,18 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
         public async Task<BookDto?> UpdateAsync(string bookId, UpdateBookDto dto)
         {
             var existing = await _bookRepository.GetByBookIdAsync(bookId);
-            if (existing == null) return null;
+            if (existing == null)
+            {
+                _logger.LogWarning("Book not found for update: {BookId}", bookId);
+                return null;
+            }
 
             _mapper.Map(dto, existing);
             existing.UpdatedAt = DateTime.UtcNow;
 
             await _bookRepository.UpdateAsync(existing);
+            _logger.LogInformation("Book updated: {BookId}", bookId);
+
             var result = _mapper.Map<BookDto>(existing);
             result.CoverImageUrl = _blobUrlGenerator.GenerateSasUrl(existing.CoverImageBlobPath);
             return result;
@@ -75,9 +89,14 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
         public async Task<bool> DeleteAsync(string bookId)
         {
             var book = await _bookRepository.GetByBookIdAsync(bookId);
-            if (book == null) return false;
+            if (book == null)
+            {
+                _logger.LogWarning("Book not found for deletion: {BookId}", bookId);
+                return false;
+            }
 
             await _bookRepository.DeleteAsync(bookId);
+            _logger.LogInformation("Book deleted: {BookId}", bookId);
             return true;
         }
     }
