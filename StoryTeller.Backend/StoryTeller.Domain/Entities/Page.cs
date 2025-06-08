@@ -2,6 +2,9 @@
 {
     public class Page
     {
+        public string Id { get; set; } = string.Empty;         
+        public string BookId { get; set; } = string.Empty;
+
         public string SectionId { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
 

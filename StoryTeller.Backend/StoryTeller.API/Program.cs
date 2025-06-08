@@ -13,6 +13,7 @@ using System.Text;
 using Microsoft.Azure.Cosmos;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +35,8 @@ builder.Services.AddSingleton<CosmosClient>(sp =>
 
 builder.Services.AddScoped<IAuthServices, AuthServices>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IPageRepository, PageRepository>();
+builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>(); // Your Cosmos repo
 builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 builder.Services.AddScoped<IGoogleClaimsParser, GoogleClaimsParser>();
