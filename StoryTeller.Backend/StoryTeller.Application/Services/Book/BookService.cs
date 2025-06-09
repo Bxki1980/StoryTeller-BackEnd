@@ -114,5 +114,21 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
             _logger.LogInformation("Book deleted: {BookId}", bookId);
             return true;
         }
+
+        public async Task<List<BookCoverDto>> GetAllBooksCoverAsync()
+        {
+            var books = await _bookRepository.GetAllAsync();
+            var dtos = new List<BookCoverDto>();
+
+            foreach (var book in books)
+            {
+                var dto = _mapper.Map<BookCoverDto>(book);
+                dto.CoverImageUrl = _blobUrlGenerator.GenerateSasUrl(book.CoverImageBlobPath);
+                dtos.Add(dto);
+            }
+
+            _logger.LogInformation("Fetched {Count} book covers", dtos.Count);
+            return dtos;
+        }
     }
 }

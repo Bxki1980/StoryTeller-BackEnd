@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Common;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.Books
@@ -64,7 +65,8 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.Books
                 return BadRequest("Pages cannot be empty.");
 
             var createdPages = await _pageService.CreateBatchAsync(bookId, dtos);
-            return Ok(createdPages);
+            return Ok(ApiResponse<List<PageDto>>.SuccessResponse(createdPages));
+
         }
     }
 }
