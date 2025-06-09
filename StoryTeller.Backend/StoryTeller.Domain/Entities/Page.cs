@@ -1,11 +1,13 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities
 {
     public class Page
     {
-        [JsonPropertyName("id")] 
-        public string Id { get; set; } = string.Empty;         
+        [JsonProperty(PropertyName = "id")] 
+        public string Id { get; set; } = string.Empty;       
+        [JsonProperty(PropertyName = "bookId")]
         public string BookId { get; set; } = string.Empty;
 
         public string SectionId { get; set; } = string.Empty;

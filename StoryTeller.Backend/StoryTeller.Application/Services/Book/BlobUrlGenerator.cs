@@ -17,11 +17,6 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
             var accountKey = config["AzureStorage:AccountKey"];
             var containerName = config["AzureStorage:ContainerName"];
 
-            Console.WriteLine("AzureStorage:AccountName = " + accountName);
-            Console.WriteLine("AzureStorage:AccountKey = " + accountKey);
-            Console.WriteLine("AzureStorage:ContainerName = " + containerName);
-
-
             if (string.IsNullOrWhiteSpace(accountName))
                 throw new InvalidOperationException("AzureStorage:AccountName is missing or empty.");
 

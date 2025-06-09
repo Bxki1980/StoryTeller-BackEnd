@@ -9,7 +9,7 @@
         public string AgeRange { get; set; } = string.Empty;
         public string CoverImageUrl { get; set; } = string.Empty;
 
-        public List<PageDto> pages { get; set; } = new();
+        public List<PageDto> Pages { get; set; } = new(); // Keep for frontend convenience
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
