@@ -75,6 +75,16 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
             await _container.DeleteItemAsync<Page>(id, new PartitionKey(bookId));
         }
 
+
+        public async Task CreateManyAsync(List<Page> pages)
+        {
+            var tasks = pages.Select(p =>
+                _container.CreateItemAsync(p, new PartitionKey(p.BookId))
+            );
+            await Task.WhenAll(tasks);
+        }
+
+
         private static string GeneratePageId(string bookId, string sectionId) =>
             $"{bookId}_{sectionId}";
     }

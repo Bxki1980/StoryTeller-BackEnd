@@ -104,6 +104,30 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
             return true;
         }
 
+        public async Task<List<PageDto>> CreateBatchAsync(string bookId, List<CreatePageDto> dtos)
+        {
+            var pages = dtos.Select(dto => new Page
+            {
+                Id = Guid.NewGuid().ToString(),
+                BookId = bookId,
+                SectionId = dto.SectionId,
+                Content = dto.Content,
+                ImageBlobPath = dto.ImageBlobPath,
+                AudioBlobPath = dto.AudioBlobPath,
+                CreatedAt = DateTime.UtcNow
+            }).ToList();
+
+            await _pageRepository.CreateManyAsync(pages); 
+            return pages.Select(p => new PageDto
+            {
+                BookId = p.BookId,
+                SectionId = p.SectionId,
+                Content = p.Content,
+                ImageUrl = _blobUrlGenerator.GenerateSasUrl(p.ImageBlobPath),
+                AudioUrl = _blobUrlGenerator.GenerateSasUrl(p.AudioBlobPath)
+            }).ToList();
+        }
+
         private static string GeneratePageId(string bookId, string sectionId) =>
             $"{bookId}_{sectionId}";
     }

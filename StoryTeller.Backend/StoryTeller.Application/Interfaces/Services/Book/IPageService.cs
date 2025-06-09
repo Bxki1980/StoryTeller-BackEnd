@@ -9,5 +9,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Ser
         Task<PageDto> CreateAsync(string bookId, CreatePageDto dto);
         Task<PageDto?> UpdateAsync(string bookId, string sectionId, CreatePageDto dto);
         Task<bool> DeleteAsync(string bookId, string sectionId);
+        Task<List<PageDto>> CreateBatchAsync(string bookId, List<CreatePageDto> dtos);
+
     }
 }
