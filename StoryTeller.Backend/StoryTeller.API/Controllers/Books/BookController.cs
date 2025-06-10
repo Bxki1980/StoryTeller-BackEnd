@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Common;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.Books
@@ -19,7 +20,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.Books
         public async Task<ActionResult<List<BookDto>>> GetAll()
         {
             var books = await _bookService.GetAllAsync();
-            return Ok(books);
+            return Ok(ApiResponse<List<BookDto>>.SuccessResponse(books));
         }
 
         [HttpGet("{bookId}")]
@@ -29,14 +30,15 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.Books
             if (book == null)
                 return NotFound();
 
-            return Ok(book);
+            return Ok(ApiResponse<BookDto>.SuccessResponse(book));
         }
 
         [HttpPost]
         public async Task<ActionResult<BookDto>> Create([FromBody] CreateBookDto dto)
         {
             var created = await _bookService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { bookId = created.BookId }, created);
+            var response = ApiResponse<BookDto>.SuccessResponse(created);
+            return CreatedAtAction(nameof(GetById), new { bookId = created.BookId }, response);
         }
 
         [HttpPut("{bookId}")]
@@ -53,7 +55,17 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.Books
         public async Task<IActionResult> Delete(string bookId)
         {
             var success = await _bookService.DeleteAsync(bookId);
-            return success ? NoContent() : NotFound();
+            if (!success)
+                return NotFound(new ProblemDetails { Title = "Book not found", Status = 404 });
+
+            return NoContent(); // 204
+        }
+
+        [HttpGet("covers")]
+        public async Task<ActionResult<ApiResponse<List<BookCoverDto>>>> GetAllCovers()
+        {
+            var covers = await _bookService.GetAllBooksCoverAsync();
+            return Ok(ApiResponse<List<BookCoverDto>>.SuccessResponse(covers));
         }
     }
 }

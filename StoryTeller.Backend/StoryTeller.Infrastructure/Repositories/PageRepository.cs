@@ -9,10 +9,15 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
     {
         private readonly Container _container;
 
+
         public PageRepository(CosmosClient cosmosClient, IConfiguration config)
         {
-            var databaseId = config["CosmosDb:DatabaseId"];
-            var containerId = config["CosmosDb:PagesContainerId"];
+            var databaseId = config["Cosmos:DatabaseName"]
+                ?? throw new InvalidOperationException("Missing Cosmos:DatabaseName in configuration");
+
+            var containerId = config["Cosmos:PagesContainerId"]
+                ?? throw new InvalidOperationException("Missing Cosmos:PagesContainerId in configuration");
+
             _container = cosmosClient.GetContainer(databaseId, containerId);
         }
 
@@ -69,6 +74,16 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
             var id = GeneratePageId(bookId, sectionId);
             await _container.DeleteItemAsync<Page>(id, new PartitionKey(bookId));
         }
+
+
+        public async Task CreateManyAsync(List<Page> pages)
+        {
+            var tasks = pages.Select(p =>
+                _container.CreateItemAsync(p, new PartitionKey(p.BookId))
+            );
+            await Task.WhenAll(tasks);
+        }
+
 
         private static string GeneratePageId(string bookId, string sectionId) =>
             $"{bookId}_{sectionId}";

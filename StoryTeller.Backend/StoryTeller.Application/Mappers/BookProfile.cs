@@ -8,13 +8,11 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Mappers
     {
         public BookProfile()
         {
-            // Book → BookDto
             CreateMap<Book, BookDto>()
-                .ForMember(dest => dest.CoverImageUrl, opt => opt.MapFrom(src => src.CoverImageBlobPath)) // rename field
+                .ForMember(dest => dest.CoverImageUrl, opt => opt.MapFrom(src => src.CoverImageBlobPath))
                 .ReverseMap()
-                .ForMember(dest => dest.CoverImageBlobPath, opt => opt.MapFrom(src => src.CoverImageUrl)); // for completeness
+                .ForMember(dest => dest.CoverImageBlobPath, opt => opt.MapFrom(src => src.CoverImageUrl));
 
-            // Page → PageDto
             CreateMap<Page, PageDto>()
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.ImageBlobPath))
                 .ForMember(dest => dest.AudioUrl, opt => opt.MapFrom(src => src.AudioBlobPath))
@@ -22,15 +20,15 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Mappers
                 .ForMember(dest => dest.ImageBlobPath, opt => opt.MapFrom(src => src.ImageUrl))
                 .ForMember(dest => dest.AudioBlobPath, opt => opt.MapFrom(src => src.AudioUrl));
 
-            // CreateBookDto → Book
-            CreateMap<CreateBookDto, Book>();
+            CreateMap<CreateBookDto, Book>(); // no need to ignore Pages if it doesn't exist
 
-            // CreatePageDto → Page
             CreateMap<CreatePageDto, Page>();
 
-            // UpdateBookDto → Book (used for PATCH or PUT)
             CreateMap<UpdateBookDto, Book>()
-                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null)); // skip null updates
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<Book, BookCoverDto>();
+
         }
     }
 }

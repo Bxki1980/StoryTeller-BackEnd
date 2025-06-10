@@ -9,5 +9,6 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Rep
         Task CreateAsync(Page page);
         Task UpdateAsync(Page page);
         Task DeleteAsync(string bookId, string sectionId);
+        Task CreateManyAsync(List<Page> pages);
     }
 }

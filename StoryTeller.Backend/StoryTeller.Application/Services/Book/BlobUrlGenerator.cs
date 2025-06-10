@@ -1,6 +1,7 @@
 ﻿using Azure.Storage;
 using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
+using Microsoft.Extensions.Logging;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
@@ -13,9 +14,20 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
 
         public BlobUrlGenerator(IConfiguration config)
         {
-            var accountName = config["Azure:BlobStorage:AccountName"];
-            var accountKey = config["Azure:BlobStorage:AccountKey"];
-            _containerName = config["Azure:BlobStorage:ContainerName"]!;
+            var accountName = config["AzureStorage:AccountName"];
+            var accountKey = config["AzureStorage:AccountKey"];
+            var containerName = config["AzureStorage:ContainerName"];
+
+            if (string.IsNullOrWhiteSpace(accountName))
+                throw new InvalidOperationException("AzureStorage:AccountName is missing or empty.");
+
+            if (string.IsNullOrWhiteSpace(accountKey))
+                throw new InvalidOperationException("AzureStorage:AccountKey is missing or empty.");
+
+            if (string.IsNullOrWhiteSpace(containerName))
+                throw new InvalidOperationException("AzureStorage:ContainerName is missing or empty.");
+
+            _containerName = containerName;
 
             _credential = new StorageSharedKeyCredential(accountName, accountKey);
             _blobServiceClient = new BlobServiceClient(

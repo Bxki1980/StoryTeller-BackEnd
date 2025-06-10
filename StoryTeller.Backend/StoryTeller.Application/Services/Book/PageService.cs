@@ -4,6 +4,7 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
+using System;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
 {
@@ -28,8 +29,11 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
             var dtos = pages.Select(page =>
             {
                 var dto = _mapper.Map<PageDto>(page);
+
                 dto.ImageUrl = _blobUrlGenerator.GenerateSasUrl(page.ImageBlobPath);
                 dto.AudioUrl = _blobUrlGenerator.GenerateSasUrl(page.AudioBlobPath);
+                _logger.LogInformation("Generating SAS for blob path: {BlobPath}", page.ImageBlobPath);
+                _logger.LogInformation("Full SAS URL: {Url}", dto.ImageUrl);
                 return dto;
             }).ToList();
 
@@ -101,6 +105,49 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
 
             await _pageRepository.DeleteAsync(bookId, sectionId);
             _logger.LogInformation("Page deleted: BookId={BookId}, SectionId={SectionId}", bookId, sectionId);
+            return true;
+        }
+
+        public async Task<List<PageDto>> CreateBatchAsync(string bookId, List<CreatePageDto> dtos)
+        {
+            var pages = dtos.Select(dto => new Page
+            {
+                Id = Guid.NewGuid().ToString(),
+                BookId = bookId,
+                SectionId = dto.SectionId,
+                Content = dto.Content,
+                ImageBlobPath = dto.ImageBlobPath,
+                AudioBlobPath = dto.AudioBlobPath,
+                CreatedAt = DateTime.UtcNow
+            }).ToList();
+
+            await _pageRepository.CreateManyAsync(pages); 
+            return pages.Select(p => new PageDto
+            {
+                BookId = p.BookId,
+                SectionId = p.SectionId,
+                Content = p.Content,
+                ImageUrl = _blobUrlGenerator.GenerateSasUrl(p.ImageBlobPath),
+                AudioUrl = _blobUrlGenerator.GenerateSasUrl(p.AudioBlobPath)
+            }).ToList();
+        }
+
+
+        public async Task<bool> DeleteAllAsync(string bookId)
+        {
+            var existing = await _pageRepository.GetPagesByBookIdAsync(bookId);
+            if (existing == null || existing.Count == 0)
+            {
+                _logger.LogWarning("No pages found for deletion: BookId={BookId}", bookId);
+                return false;
+            }
+
+
+            for (var i = 0; i < existing.Count; i++)
+            {
+                var page = existing[i];
+                await _pageRepository.DeleteAsync(page.BookId, page.SectionId);
+            }
             return true;
         }
 

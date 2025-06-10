@@ -25,8 +25,6 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Validators
             RuleFor(x => x.CoverImageBlobPath)
                 .NotEmpty().WithMessage("Cover image path is required.");
 
-            RuleForEach(x => x.Pages)
-                .SetValidator(new CreatePageDtoValidator());
         }
     }
 }

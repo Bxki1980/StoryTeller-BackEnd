@@ -4,19 +4,27 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositories;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
 {
     public class BookService : IBookService
     {
         private readonly IBookRepository _bookRepository;
+        private readonly IPageService _pageService;
         private readonly IMapper _mapper;
         private readonly IBlobUrlGenerator _blobUrlGenerator;
         private readonly ILogger<BookService> _logger;
 
-        public BookService(IBookRepository bookRepository, IMapper mapper, IBlobUrlGenerator blobUrlGenerator, ILogger<BookService> logger)
+        public BookService(
+            IBookRepository bookRepository,
+            IPageService pageService,
+            IMapper mapper,
+            IBlobUrlGenerator blobUrlGenerator,
+            ILogger<BookService> logger)
         {
             _bookRepository = bookRepository;
+            _pageService = pageService;
             _mapper = mapper;
             _blobUrlGenerator = blobUrlGenerator;
             _logger = logger;
@@ -25,12 +33,15 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
         public async Task<List<BookDto>> GetAllAsync()
         {
             var books = await _bookRepository.GetAllAsync();
-            var dtos = books.Select(book =>
+            var dtos = new List<BookDto>();
+
+            foreach (var book in books)
             {
                 var dto = _mapper.Map<BookDto>(book);
                 dto.CoverImageUrl = _blobUrlGenerator.GenerateSasUrl(book.CoverImageBlobPath);
-                return dto;
-            }).ToList();
+                dto.Pages = await _pageService.GetPagesByBookIdAsync(book.BookId);
+                dtos.Add(dto);
+            }
 
             _logger.LogInformation("Fetched {Count} books", dtos.Count);
             return dtos;
@@ -47,13 +58,14 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
 
             var dto = _mapper.Map<BookDto>(book);
             dto.CoverImageUrl = _blobUrlGenerator.GenerateSasUrl(book.CoverImageBlobPath);
+            dto.Pages = await _pageService.GetPagesByBookIdAsync(book.BookId);
             return dto;
         }
 
         public async Task<BookDto> CreateAsync(CreateBookDto dto)
         {
             var book = _mapper.Map<StoryTeller.Domain.Entities.Book>(dto);
-            book.Id = Guid.NewGuid().ToString();
+            book.BookId = book.BookId;
             book.CreatedAt = DateTime.UtcNow;
             book.UpdatedAt = book.CreatedAt;
             book.Version = "1.0.0";
@@ -63,6 +75,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
 
             var result = _mapper.Map<BookDto>(book);
             result.CoverImageUrl = _blobUrlGenerator.GenerateSasUrl(book.CoverImageBlobPath);
+            result.Pages = new(); // Pages created separately
             return result;
         }
 
@@ -83,6 +96,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
 
             var result = _mapper.Map<BookDto>(existing);
             result.CoverImageUrl = _blobUrlGenerator.GenerateSasUrl(existing.CoverImageBlobPath);
+            result.Pages = await _pageService.GetPagesByBookIdAsync(bookId);
             return result;
         }
 
@@ -96,8 +110,25 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
             }
 
             await _bookRepository.DeleteAsync(bookId);
+            await _pageService.DeleteAllAsync(bookId); // Delete all pages associated with the book
             _logger.LogInformation("Book deleted: {BookId}", bookId);
             return true;
+        }
+
+        public async Task<List<BookCoverDto>> GetAllBooksCoverAsync()
+        {
+            var books = await _bookRepository.GetAllAsync();
+            var dtos = new List<BookCoverDto>();
+
+            foreach (var book in books)
+            {
+                var dto = _mapper.Map<BookCoverDto>(book);
+                dto.CoverImageUrl = _blobUrlGenerator.GenerateSasUrl(book.CoverImageBlobPath);
+                dtos.Add(dto);
+            }
+
+            _logger.LogInformation("Fetched {Count} book covers", dtos.Count);
+            return dtos;
         }
     }
 }

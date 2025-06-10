@@ -11,9 +11,13 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
 
         public BookRepository(CosmosClient cosmosClient, IConfiguration config)
         {
-            var databaseId = config["CosmosDb:DatabaseId"];
-            var containerId = config["CosmosDb:BooksContainerId"];
-            _container = cosmosClient.GetContainer("StoryTeller", "Books");
+            var databaseId = config["Cosmos:DatabaseName"]
+                ?? throw new InvalidOperationException("Missing Cosmos:DatabaseName in configuration");
+
+            var containerId = config["Cosmos:BooksContainerId"]
+                ?? throw new InvalidOperationException("Missing Cosmos:BooksContainerId in configuration");
+
+            _container = cosmosClient.GetContainer(databaseId, containerId);
         }
 
         public async Task CreateAsync(Book book)
