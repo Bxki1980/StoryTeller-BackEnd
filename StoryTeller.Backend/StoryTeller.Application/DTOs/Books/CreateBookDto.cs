@@ -17,6 +17,5 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books
         [Required]
         public string CoverImageBlobPath { get; set; } = string.Empty;
 
-        public List<CreatePageDto> Pages { get; set; } = new();
     }
 }

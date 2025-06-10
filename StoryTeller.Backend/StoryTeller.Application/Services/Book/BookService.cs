@@ -65,8 +65,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
         public async Task<BookDto> CreateAsync(CreateBookDto dto)
         {
             var book = _mapper.Map<StoryTeller.Domain.Entities.Book>(dto);
-            book.Id = Guid.NewGuid().ToString();
-            book.BookId = book.Id;
+            book.BookId = book.BookId;
             book.CreatedAt = DateTime.UtcNow;
             book.UpdatedAt = book.CreatedAt;
             book.Version = "1.0.0";
@@ -111,6 +110,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
             }
 
             await _bookRepository.DeleteAsync(bookId);
+            await _pageService.DeleteAllAsync(bookId); // Delete all pages associated with the book
             _logger.LogInformation("Book deleted: {BookId}", bookId);
             return true;
         }

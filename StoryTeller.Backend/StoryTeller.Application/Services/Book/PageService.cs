@@ -128,6 +128,25 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
             }).ToList();
         }
 
+
+        public async Task<bool> DeleteAllAsync(string bookId)
+        {
+            var existing = await _pageRepository.GetPagesByBookIdAsync(bookId);
+            if (existing == null || existing.Count == 0)
+            {
+                _logger.LogWarning("No pages found for deletion: BookId={BookId}", bookId);
+                return false;
+            }
+
+
+            for (var i = 0; i < existing.Count; i++)
+            {
+                var page = existing[i];
+                await _pageRepository.DeleteAsync(page.BookId, page.SectionId);
+            }
+            return true;
+        }
+
         private static string GeneratePageId(string bookId, string sectionId) =>
             $"{bookId}_{sectionId}";
     }

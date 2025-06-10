@@ -55,7 +55,10 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.Books
         public async Task<IActionResult> Delete(string bookId)
         {
             var success = await _bookService.DeleteAsync(bookId);
-            return success ? NoContent() : NotFound();
+            if (!success)
+                return NotFound(new ProblemDetails { Title = "Book not found", Status = 404 });
+
+            return NoContent(); // 204
         }
 
         [HttpGet("covers")]
