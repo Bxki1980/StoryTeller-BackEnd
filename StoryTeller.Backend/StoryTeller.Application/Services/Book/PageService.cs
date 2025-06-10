@@ -4,6 +4,7 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
+using System;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
 {
@@ -28,8 +29,11 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
             var dtos = pages.Select(page =>
             {
                 var dto = _mapper.Map<PageDto>(page);
+
                 dto.ImageUrl = _blobUrlGenerator.GenerateSasUrl(page.ImageBlobPath);
                 dto.AudioUrl = _blobUrlGenerator.GenerateSasUrl(page.AudioBlobPath);
+                _logger.LogInformation("Generating SAS for blob path: {BlobPath}", page.ImageBlobPath);
+                _logger.LogInformation("Full SAS URL: {Url}", dto.ImageUrl);
                 return dto;
             }).ToList();
 
