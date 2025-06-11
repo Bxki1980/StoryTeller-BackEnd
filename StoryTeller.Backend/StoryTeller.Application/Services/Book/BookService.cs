@@ -115,19 +115,35 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
             return true;
         }
 
-        public async Task<List<BookCoverDto>> GetAllBooksCoverAsync()
+        public async Task<List<BookDetailDto>> GetAllBooksDetailAsync()
         {
-            var books = await _bookRepository.GetAllAsync();
-            var dtos = new List<BookCoverDto>();
+            var booksDetails = await _bookRepository.GetAllAsync();
+            var dtos = new List<BookDetailDto>();
 
-            foreach (var book in books)
+            foreach (var booksDetail in booksDetails)
             {
-                var dto = _mapper.Map<BookCoverDto>(book);
-                dto.CoverImageUrl = _blobUrlGenerator.GenerateSasUrl(book.CoverImageBlobPath);
+                var dto = _mapper.Map<BookDetailDto>(booksDetail);
+                dto.CoverImageUrl = _blobUrlGenerator.GenerateSasUrl(booksDetail.CoverImageBlobPath);
                 dtos.Add(dto);
             }
 
             _logger.LogInformation("Fetched {Count} book covers", dtos.Count);
+            return dtos;
+        }
+
+        public async Task<List<BookCoverDto>> GetAllBooksCoverAsync()
+        {
+            var books = await _bookRepository.GetAllAsync();
+
+            var dtos = books.Select(book =>
+            {
+                var dto = _mapper.Map<BookCoverDto>(book);
+                dto.CoverImageUrl = _blobUrlGenerator.GenerateSasUrl(book.CoverImageBlobPath);
+                return dto;
+            }).ToList();
+
+            _logger.LogInformation("Fetched {Count} book covers", dtos.Count);
+
             return dtos;
         }
     }

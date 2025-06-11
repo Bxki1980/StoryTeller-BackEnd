@@ -10,62 +10,122 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.Books
     public class BookController : ControllerBase
     {
         private readonly IBookService _bookService;
+        private readonly ILogger<BookController> _logger;
 
-        public BookController(IBookService bookService)
+        public BookController(IBookService bookService, ILogger<BookController> logger)
         {
             _bookService = bookService;
+            _logger = logger;
         }
 
+        /// <summary>
+        /// Get all books with full details and their associated pages.
+        /// </summary>
         [HttpGet]
-        public async Task<ActionResult<List<BookDto>>> GetAll()
+        [ProducesResponseType(typeof(ApiResponse<List<BookDto>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<BookDto>>>> GetAll()
         {
             var books = await _bookService.GetAllAsync();
             return Ok(ApiResponse<List<BookDto>>.SuccessResponse(books));
         }
 
+        /// <summary>
+        /// Get a specific book by its ID, including pages.
+        /// </summary>
         [HttpGet("{bookId}")]
-        public async Task<ActionResult<BookDto>> GetById(string bookId)
+        [ProducesResponseType(typeof(ApiResponse<BookDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<BookDto>>> GetById(string bookId)
         {
             var book = await _bookService.GetByBookIdAsync(bookId);
             if (book == null)
-                return NotFound();
+            {
+                _logger.LogWarning("Book not found: {BookId}", bookId);
+                return NotFound(ApiResponse<string>.Fail("Book not found"));
+            }
 
             return Ok(ApiResponse<BookDto>.SuccessResponse(book));
         }
 
+        /// <summary>
+        /// Create a new book entry.
+        /// </summary>
         [HttpPost]
-        public async Task<ActionResult<BookDto>> Create([FromBody] CreateBookDto dto)
+        [ProducesResponseType(typeof(ApiResponse<BookDto>), StatusCodes.Status201Created)]
+        public async Task<ActionResult<ApiResponse<BookDto>>> Create([FromBody] CreateBookDto dto)
         {
             var created = await _bookService.CreateAsync(dto);
             var response = ApiResponse<BookDto>.SuccessResponse(created);
+
             return CreatedAtAction(nameof(GetById), new { bookId = created.BookId }, response);
         }
 
+        /// <summary>
+        /// Update an existing book by its ID.
+        /// </summary>
         [HttpPut("{bookId}")]
-        public async Task<ActionResult<BookDto>> Update(string bookId, [FromBody] UpdateBookDto dto)
+        [ProducesResponseType(typeof(ApiResponse<BookDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<BookDto>>> Update(string bookId, [FromBody] UpdateBookDto dto)
         {
             var updated = await _bookService.UpdateAsync(bookId, dto);
             if (updated == null)
-                return NotFound();
+            {
+                _logger.LogWarning("Book not found for update: {BookId}", bookId);
+                return NotFound(ApiResponse<string>.Fail("Book not found"));
+            }
 
-            return Ok(updated);
+            return Ok(ApiResponse<BookDto>.SuccessResponse(updated));
         }
 
+        /// <summary>
+        /// Delete a book and all its pages.
+        /// </summary>
         [HttpDelete("{bookId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(string bookId)
         {
             var success = await _bookService.DeleteAsync(bookId);
             if (!success)
-                return NotFound(new ProblemDetails { Title = "Book not found", Status = 404 });
+            {
+                _logger.LogWarning("Book not found for deletion: {BookId}", bookId);
+                return NotFound(ApiResponse<string>.Fail("Book not found"));
+            }
 
-            return NoContent(); // 204
+            return NoContent();
         }
 
-        [HttpGet("covers")]
-        public async Task<ActionResult<ApiResponse<List<BookCoverDto>>>> GetAllCovers()
+        /// <summary>
+        /// Get summarized book detail (with cover) for all books.
+        /// </summary>
+        [HttpGet("detail")]
+        [ProducesResponseType(typeof(ApiResponse<List<BookDetailDto>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<BookDetailDto>>>> GetAllDetail()
         {
-            var covers = await _bookService.GetAllBooksCoverAsync();
-            return Ok(ApiResponse<List<BookCoverDto>>.SuccessResponse(covers));
+            // NOTE: this line might be incorrect based on naming. You probably mean GetAllBooksDetailAsync?
+            var detail = await _bookService.GetAllBooksDetailAsync();
+            return Ok(ApiResponse<List<BookDetailDto>>.SuccessResponse(detail));
+        }
+
+        /// <summary>
+        /// Get all books with only cover image and metadata.
+        /// </summary>
+        [HttpGet("covers")]
+        [ProducesResponseType(typeof(List<BookCoverDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<List<BookCoverDto>>> GetAllBookCovers()
+        {
+            try
+            {
+                var covers = await _bookService.GetAllBooksCoverAsync();
+                return Ok(covers);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching book covers");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching book covers.");
+            }
         }
     }
 }
