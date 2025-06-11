@@ -115,21 +115,20 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
             return true;
         }
 
-        public async Task<List<BookDetailDto>> GetAllBooksDetailAsync()
+        public async Task<BookDetailDto?> GetBookDetailAsync(string bookId)
         {
-            var booksDetails = await _bookRepository.GetAllAsync();
-            var dtos = new List<BookDetailDto>();
-
-            foreach (var booksDetail in booksDetails)
+            var book = await _bookRepository.GetByBookIdAsync(bookId);
+            if (book == null)
             {
-                var dto = _mapper.Map<BookDetailDto>(booksDetail);
-                dto.CoverImageUrl = _blobUrlGenerator.GenerateSasUrl(booksDetail.CoverImageBlobPath);
-                dtos.Add(dto);
+                _logger.LogWarning("Book not found: {BookId}", bookId);
+                return null;
             }
 
-            _logger.LogInformation("Fetched {Count} book covers", dtos.Count);
-            return dtos;
+            var dto = _mapper.Map<BookDetailDto>(book);
+            dto.CoverImageUrl = _blobUrlGenerator.GenerateSasUrl(book.CoverImageBlobPath);
+            return dto;
         }
+
 
         public async Task<List<BookCoverDto>> GetAllBooksCoverAsync()
         {

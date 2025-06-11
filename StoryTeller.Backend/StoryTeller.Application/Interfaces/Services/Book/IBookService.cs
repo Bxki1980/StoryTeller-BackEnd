@@ -6,7 +6,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Ser
     {
         Task<List<BookDto>> GetAllAsync();
         Task<List<BookCoverDto>> GetAllBooksCoverAsync();
-        Task<List<BookDetailDto>> GetAllBooksDetailAsync();
+        Task<BookDetailDto> GetBookDetailAsync(string bookId);
         Task<BookDto?> GetByBookIdAsync(string bookId);
         Task<BookDto> CreateAsync(CreateBookDto dto);
         Task<BookDto?> UpdateAsync(string bookId, UpdateBookDto dto);

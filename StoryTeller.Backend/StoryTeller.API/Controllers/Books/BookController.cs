@@ -97,15 +97,21 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.Books
         }
 
         /// <summary>
-        /// Get summarized book detail (with cover) for all books.
+        /// Get detailed info for a specific book by ID.
         /// </summary>
-        [HttpGet("detail")]
-        [ProducesResponseType(typeof(ApiResponse<List<BookDetailDto>>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ApiResponse<List<BookDetailDto>>>> GetAllDetail()
+        [HttpGet("{bookId}/detail")]
+        [ProducesResponseType(typeof(ApiResponse<BookDetailDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<BookDetailDto>>> GetBookDetailById(string bookId)
         {
-            // NOTE: this line might be incorrect based on naming. You probably mean GetAllBooksDetailAsync?
-            var detail = await _bookService.GetAllBooksDetailAsync();
-            return Ok(ApiResponse<List<BookDetailDto>>.SuccessResponse(detail));
+            var detail = await _bookService.GetBookDetailAsync(bookId);
+            if (detail == null)
+            {
+                _logger.LogWarning("Book detail not found: {BookId}", bookId);
+                return NotFound(ApiResponse<string>.Fail("Book not found"));
+            }
+
+            return Ok(ApiResponse<BookDetailDto>.SuccessResponse(detail));
         }
 
         /// <summary>
