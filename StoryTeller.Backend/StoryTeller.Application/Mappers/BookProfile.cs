@@ -28,6 +28,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Mappers
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<Book, BookDetailDto>();
+            CreateMap<Book, BookCoverDto>();
 
         }
     }
