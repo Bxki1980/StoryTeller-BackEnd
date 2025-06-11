@@ -1,24 +1,25 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.Azure.Cosmos;
 using Microsoft.IdentityModel.Tokens;
 using StoryTeller.StoryTeller.Backend.StoryTeller.API.Middlewares;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Auth;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Book;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Auth;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Validators;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositories;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Services.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Logger;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Setting;
 using System.Text;
-using Microsoft.Azure.Cosmos;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book;
-using FluentValidation;
-using FluentValidation.AspNetCore;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Validators;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Auth;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Book;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Auth;
+using System.Text.Json;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,7 +34,11 @@ builder.Services
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateBookDtoValidator>();
 
-builder.Services.AddControllers(); 
+builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

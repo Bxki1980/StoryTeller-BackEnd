@@ -119,7 +119,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.Books
             try
             {
                 var covers = await _bookService.GetAllBooksCoverAsync();
-                return Ok(covers);
+                return Ok(ApiResponse<List<BookCoverDto>>.SuccessResponse(covers));
             }
             catch (Exception ex)
             {
