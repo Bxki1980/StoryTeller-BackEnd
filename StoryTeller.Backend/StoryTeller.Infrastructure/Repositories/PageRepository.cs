@@ -1,4 +1,8 @@
-﻿using Microsoft.Azure.Cosmos;
+﻿using AutoMapper;
+using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.common;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 using System.Net;
@@ -8,10 +12,12 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
     public class PageRepository : IPageRepository
     {
         private readonly Container _container;
+        private readonly IMapper _mapper;
 
 
-        public PageRepository(CosmosClient cosmosClient, IConfiguration config)
+        public PageRepository(CosmosClient cosmosClient, IConfiguration config, IMapper mapper )
         {
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             var databaseId = config["Cosmos:DatabaseName"]
                 ?? throw new InvalidOperationException("Missing Cosmos:DatabaseName in configuration");
 
@@ -21,7 +27,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
             _container = cosmosClient.GetContainer(databaseId, containerId);
         }
 
-        public async Task<List<Page>> GetPagesByBookIdAsync(string bookId)
+        public async Task<List<Page>> GetPagesByBookIdRawAsync(string bookId)
         {
             var query = new QueryDefinition("SELECT * FROM c WHERE c.bookId = @bookId")
                 .WithParameter("@bookId", bookId);
@@ -37,6 +43,47 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
 
             return pages;
         }
+
+        public async Task<PaginatedContinuationResponse<PageDto>> GetPaginatedPagesByBookIdAsync(string bookId, PageQueryParameters queryParams)
+        {
+
+            var queryDefinition = new QueryDefinition("SELECT * FROM c WHERE c.bookId = @bookId")
+                .WithParameter("@bookId", bookId);
+
+            var queryRequestOptions = new QueryRequestOptions
+            {
+                PartitionKey = new PartitionKey(bookId),
+                MaxItemCount = queryParams.PageSize
+            };
+
+            var feedIterator = _container.GetItemQueryIterator<Page>(
+                queryDefinition,
+                queryParams.ContinuationToken,
+                queryRequestOptions);
+
+            if (!feedIterator.HasMoreResults)
+            {
+                return new PaginatedContinuationResponse<PageDto>
+                {
+                    Data = Enumerable.Empty<PageDto>(),
+                    ContinuationToken = null
+                };
+            }
+
+            var response = await feedIterator.ReadNextAsync();
+
+            var pageDtos = _mapper.Map<IEnumerable<PageDto>>(response.Resource);
+
+            return new PaginatedContinuationResponse<PageDto>
+            {
+                Data = pageDtos,
+                ContinuationToken = response.ContinuationToken
+            };
+        }
+
+
+
+
 
         public async Task<Page?> GetBySectionIdAsync(string bookId, string sectionId)
         {

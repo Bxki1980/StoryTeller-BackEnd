@@ -4,7 +4,7 @@ using Azure.Storage.Sas;
 using Microsoft.Extensions.Logging;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
 
-namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
+namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.BlobStorage
 {
     public class BlobUrlGenerator : IBlobUrlGenerator
     {

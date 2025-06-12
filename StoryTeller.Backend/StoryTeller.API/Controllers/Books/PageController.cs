@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.common;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Common;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
 
@@ -19,6 +20,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.Books
         [HttpGet("book/{bookId}")]
         public async Task<ActionResult<List<PageDto>>> GetPagesByBookId(string bookId)
         {
+
             var pages = await _pageService.GetPagesByBookIdAsync(bookId);
             return Ok(pages);
         }
@@ -68,5 +70,25 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.Books
             return Ok(ApiResponse<List<PageDto>>.SuccessResponse(createdPages));
 
         }
+
+        /// <summary>
+        /// Get paginated pages for a specific book using continuation token.
+        /// </summary>
+        /// <param name="bookId">Book ID (Partition Key)</param>
+        /// <param name="queryParams">Pagination parameters</param>
+        /// <returns>Paginated list of pages</returns>
+        [HttpGet("book/{bookId}/pages")]
+        public async Task<ActionResult<ApiResponse<PaginatedContinuationResponse<PageDto>>>> GetPaginatedPages(
+            string bookId,
+            [FromQuery] PageQueryParameters queryParams)
+        {
+            if (string.IsNullOrWhiteSpace(bookId))
+                return BadRequest(ApiResponse<string>.Fail("Book ID is required."));
+
+            var result = await _pageService.GetPaginatedPagesByBookIdAsync(bookId, queryParams);
+
+            return Ok(ApiResponse<PaginatedContinuationResponse<PageDto>>.SuccessResponse(result));
+        }
+
     }
 }

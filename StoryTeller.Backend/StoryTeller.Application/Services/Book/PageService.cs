@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.common;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
@@ -25,7 +26,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
 
         public async Task<List<PageDto>> GetPagesByBookIdAsync(string bookId)
         {
-            var pages = await _pageRepository.GetPagesByBookIdAsync(bookId);
+            var pages = await _pageRepository.GetPagesByBookIdRawAsync(bookId);
             var dtos = pages.Select(page =>
             {
                 var dto = _mapper.Map<PageDto>(page);
@@ -39,6 +40,26 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
 
             _logger.LogInformation("Fetched {Count} pages for BookId={BookId}", dtos.Count, bookId);
             return dtos;
+        }
+
+
+        public async Task<PaginatedContinuationResponse<PageDto>> GetPaginatedPagesByBookIdAsync(string bookId, PageQueryParameters queryParams)
+        {
+            if (string.IsNullOrWhiteSpace(bookId))
+                throw new ArgumentException("BookId must be provided.", nameof(bookId));
+
+            if (queryParams.PageSize <= 0 || queryParams.PageSize > 50)
+                queryParams.PageSize = 10; // fallback default
+
+            _logger.LogInformation("Fetching pages for BookId: {BookId} with PageSize: {PageSize}", bookId, queryParams.PageSize);
+
+            var result = await _pageRepository.GetPaginatedPagesByBookIdAsync(bookId, queryParams);
+
+            _logger.LogInformation("Fetched {Count} pages, next continuation: {Continuation}",
+                result.Data.Count(),
+                result.ContinuationToken ?? "null");
+
+            return result;
         }
 
         public async Task<PageDto?> GetBySectionIdAsync(string bookId, string sectionId)
@@ -135,7 +156,8 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
 
         public async Task<bool> DeleteAllAsync(string bookId)
         {
-            var existing = await _pageRepository.GetPagesByBookIdAsync(bookId);
+
+            var existing = await _pageRepository.GetPagesByBookIdRawAsync(bookId);
             if (existing == null || existing.Count == 0)
             {
                 _logger.LogWarning("No pages found for deletion: BookId={BookId}", bookId);

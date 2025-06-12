@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.common;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
@@ -15,6 +16,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
         private readonly IMapper _mapper;
         private readonly IBlobUrlGenerator _blobUrlGenerator;
         private readonly ILogger<BookService> _logger;
+
 
         public BookService(
             IBookRepository bookRepository,

@@ -14,6 +14,7 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Validators;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Auth;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.BlobStorage;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositories;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Services.Auth;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Shared.Logger;

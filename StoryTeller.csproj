@@ -40,7 +40,6 @@
     <Folder Include="StoryTeller.Backend\StoryTeller.Application\Constants\" />
     <Folder Include="StoryTeller.Backend\StoryTeller.Application\Helpers\" />
     <Folder Include="StoryTeller.Backend\StoryTeller.Application\Validators\" />
-    <Folder Include="StoryTeller.Backend\StoryTeller.Infrastructure\BlobStorage\" />
     <Folder Include="StoryTeller.Backend\StoryTeller.Infrastructure\Configurations\" />
   </ItemGroup>
 
