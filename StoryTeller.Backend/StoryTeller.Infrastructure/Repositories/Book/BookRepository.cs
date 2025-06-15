@@ -3,7 +3,7 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Reposit
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 using System.Net;
 
-namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositories
+namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositories.Book
 {
     public class BookRepository : IBookRepository
     {
@@ -20,7 +20,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
             _container = cosmosClient.GetContainer(databaseId, containerId);
         }
 
-        public async Task CreateAsync(Book book)
+        public async Task CreateAsync(StoryTeller.Domain.Entities.Book book)
         {
             book.CreatedAt = DateTime.UtcNow;
             book.UpdatedAt = DateTime.UtcNow;
@@ -32,15 +32,15 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
             var book = await GetByBookIdAsync(bookId);
             if (book is not null)
             {
-                await _container.DeleteItemAsync<Book>(book.Id, new PartitionKey(book.Id));
+                await _container.DeleteItemAsync<StoryTeller.Domain.Entities.Book>(book.Id, new PartitionKey(book.Id));
             }
         }
 
-        public async Task<List<Book>> GetAllAsync()
+        public async Task<List<StoryTeller.Domain.Entities.Book>> GetAllAsync()
         {
             var query = new QueryDefinition("SELECT * FROM c");
-            using var iterator = _container.GetItemQueryIterator<Book>(query);
-            var result = new List<Book>();
+            using var iterator = _container.GetItemQueryIterator<StoryTeller.Domain.Entities.Book>(query);
+            var result = new List<StoryTeller.Domain.Entities.Book>();
 
             while (iterator.HasMoreResults)
             {
@@ -51,12 +51,12 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
             return result;
         }
 
-        public async Task<Book?> GetByBookIdAsync(string bookId)
+        public async Task<StoryTeller.Domain.Entities.Book?> GetByBookIdAsync(string bookId)
         {
             var query = new QueryDefinition("SELECT * From c WHERE c.bookId = @bookId")
                 .WithParameter("@bookId", bookId);
 
-            using var iterator = _container.GetItemQueryIterator<Book>(query);
+            using var iterator = _container.GetItemQueryIterator<StoryTeller.Domain.Entities.Book>(query);
             while (iterator.HasMoreResults)
             {
                 var response = await iterator.ReadNextAsync();
@@ -66,7 +66,7 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
             return null;
         }
 
-        public async Task UpdateAsync(Book book)
+        public async Task UpdateAsync(StoryTeller.Domain.Entities.Book book)
         {
             book.UpdatedAt = DateTime.UtcNow;
             await _container.UpsertItemAsync(book, new PartitionKey(book.Id));

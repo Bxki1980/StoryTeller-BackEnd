@@ -7,7 +7,7 @@ using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Reposit
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 using System.Net;
 
-namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositories
+namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositories.Book
 {
     public class PageRepository : IPageRepository
     {
