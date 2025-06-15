@@ -6,7 +6,10 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Ser
     public interface IPageService
     {
         Task<List<PageDto>> GetPagesByBookIdAsync(string bookId);
-        Task<PaginatedContinuationResponse<PageDto>> GetPaginatedPagesByBookIdAsync(string bookId, PageQueryParameters queryParams);
+        Task<PaginatedContinuationResponse<PageDto>> GetPaginatedPagesByBookIdAsync(
+            string bookId,
+            PageQueryParameters queryParams,
+            CancellationToken cancellationToken = default);
         Task<PageDto?> GetBySectionIdAsync(string bookId, string sectionId);
         Task<PageDto> CreateAsync(string bookId, CreatePageDto dto);
         Task<PageDto?> UpdateAsync(string bookId, string sectionId, CreatePageDto dto);
