@@ -12,6 +12,8 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Rep
         Task UpdateAsync(Page page);
         Task DeleteAsync(string bookId, string sectionId);
         Task CreateManyAsync(List<Page> pages);
-        Task<PaginatedContinuationResponse<PageDto>> GetPaginatedPagesByBookIdAsync(string bookId, PageQueryParameters queryParams);
+        Task<PaginatedContinuationResponse<Page>> GetPaginatedPagesByBookIdAsync(
+             string bookId,
+             PageQueryParameters queryParams);
     }
 }

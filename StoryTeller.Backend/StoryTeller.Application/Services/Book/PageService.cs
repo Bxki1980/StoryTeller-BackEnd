@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.common;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Book;
@@ -52,40 +53,31 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
                 throw new ArgumentException("BookId must be provided.", nameof(bookId));
 
             if (queryParams.PageSize <= 0 || queryParams.PageSize > 50)
-                queryParams.PageSize = 10;
+                queryParams.PageSize = 10; // Default safety limit
 
-            // ✅ Validate token length
-            if (queryParams.ContinuationToken?.Length > 2000)
-                throw new ArgumentException("ContinuationToken is too long.", nameof(queryParams.ContinuationToken));
+            _logger.LogInformation("📘 Fetching pages for BookId: {BookId}, PageSize: {PageSize}, ContinuationToken: {Token}",
+                bookId, queryParams.PageSize, queryParams.ContinuationToken ?? "<null>");
 
-            // ✅ Log token for better traceability
-            _logger.LogInformation("📘 Fetching pages for BookId: {BookId} with PageSize: {PageSize} and Token: {Token}",
-                bookId, queryParams.PageSize, queryParams.ContinuationToken ?? "null");
+            // 🔄 Fetch paginated data from repository
+            var pagedResult = await _pageRepository.GetPaginatedPagesByBookIdAsync(bookId, queryParams);
 
-            var result = await _pageRepository.GetPaginatedPagesByBookIdAsync(bookId, queryParams);
-
-            var dtoPages = result.Data.Select(page => new PageDto
+            // 🎯 Map entities to DTOs and generate secure access URLs
+            var dtoList = pagedResult.Data.Select(page => new PageDto
             {
                 SectionId = page.SectionId,
                 Content = page.Content,
                 BookId = page.BookId,
-                ImageUrl = _blobUrlGenerator.GenerateSasUrl(page.ImageUrl),
-                AudioUrl = _blobUrlGenerator.GenerateSasUrl(page.AudioUrl),
+                ImageUrl = _blobUrlGenerator.GenerateSasUrl(page.ImageBlobPath),
+                AudioUrl = _blobUrlGenerator.GenerateSasUrl(page.AudioBlobPath),
             }).ToList();
-
-            if (dtoPages.Count == 0)
-            {
-                _logger.LogWarning("⚠ No pages found for BookId: {BookId}", bookId);
-            }
-
-            _logger.LogInformation("✅ Returned {Count} pages. ContinuationToken: {Token}", dtoPages.Count, result.ContinuationToken ?? "null");
 
             return new PaginatedContinuationResponse<PageDto>
             {
-                Data = dtoPages,
-                ContinuationToken = result.ContinuationToken
+                Data = dtoList,
+                ContinuationToken = pagedResult.ContinuationToken // Token passed unchanged
             };
         }
+
 
 
         public async Task<PageDto?> GetBySectionIdAsync(string bookId, string sectionId)
@@ -201,6 +193,12 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
 
         private static string GeneratePageId(string bookId, string sectionId) =>
             $"{bookId}_{sectionId}";
+
+        // ✅ Local helper class to unwrap the malformed continuation token if needed
+        private class ContinuationTokenWrapper
+        {
+            public string token { get; set; }
+        }
 
     }
 }

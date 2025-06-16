@@ -44,45 +44,37 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositorie
             return pages;
         }
 
-        public async Task<PaginatedContinuationResponse<PageDto>> GetPaginatedPagesByBookIdAsync(string bookId, PageQueryParameters queryParams)
+        public async Task<PaginatedContinuationResponse<Page>> GetPaginatedPagesByBookIdAsync(
+     string bookId,
+     PageQueryParameters queryParams)
         {
+            if (string.IsNullOrWhiteSpace(bookId))
+                throw new ArgumentException("BookId must be provided.", nameof(bookId));
 
-            var queryDefinition = new QueryDefinition("SELECT * FROM c WHERE c.bookId = @bookId")
+            var query = new QueryDefinition("SELECT * FROM c WHERE c.bookId = @bookId")
                 .WithParameter("@bookId", bookId);
 
-            var queryRequestOptions = new QueryRequestOptions
+            var requestOptions = new QueryRequestOptions
             {
                 PartitionKey = new PartitionKey(bookId),
                 MaxItemCount = queryParams.PageSize
             };
 
-            var feedIterator = _container.GetItemQueryIterator<Page>(
-                queryDefinition,
+            // ✅ Use raw string as continuationToken
+            var iterator = _container.GetItemQueryIterator<Page>(
+                query,
                 queryParams.ContinuationToken,
-                queryRequestOptions);
+                requestOptions
+            );
 
-            if (!feedIterator.HasMoreResults)
+            var response = await iterator.ReadNextAsync();
+
+            return new PaginatedContinuationResponse<Page>
             {
-                return new PaginatedContinuationResponse<PageDto>
-                {
-                    Data = Enumerable.Empty<PageDto>(),
-                    ContinuationToken = null
-                };
-            }
-
-            var response = await feedIterator.ReadNextAsync();
-
-            var pageDtos = _mapper.Map<IEnumerable<PageDto>>(response.Resource);
-
-            return new PaginatedContinuationResponse<PageDto>
-            {
-                Data = pageDtos,
+                Data = response.Resource,
                 ContinuationToken = response.ContinuationToken
             };
         }
-
-
-
 
 
         public async Task<Page?> GetBySectionIdAsync(string bookId, string sectionId)

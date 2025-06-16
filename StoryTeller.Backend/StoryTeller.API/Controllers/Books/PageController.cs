@@ -11,10 +11,12 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.Books
     public class PageController : ControllerBase
     {
         private readonly IPageService _pageService;
+        private readonly ILogger<PageController> _logger;
 
-        public PageController(IPageService pageService)
+        public PageController(IPageService pageService, ILogger<PageController> logger)
         {
             _pageService = pageService;
+            _logger = logger;
         }
 
         [HttpGet("book/{bookId}")]
@@ -71,24 +73,36 @@ namespace StoryTeller.StoryTeller.Backend.StoryTeller.API.Controllers.Books
 
         }
 
+
         /// <summary>
-        /// Get paginated pages for a specific book using continuation token.
+        /// Retrieves a paginated list of pages for a specific book using continuation token.
         /// </summary>
-        /// <param name="bookId">Book ID (Partition Key)</param>
-        /// <param name="queryParams">Pagination parameters</param>
-        /// <returns>Paginated list of pages</returns>
+        /// <param name="bookId">The ID of the book (also used as partition key).</param>
+        /// <param name="queryParams">Pagination parameters including page size and continuation token.</param>
+        /// <returns>A paginated response containing a list of PageDto objects and a continuation token.</returns>
         [HttpGet("book/{bookId}/pages")]
+        [ProducesResponseType(typeof(ApiResponse<PaginatedContinuationResponse<PageDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ApiResponse<PaginatedContinuationResponse<PageDto>>>> GetPaginatedPages(
             string bookId,
             [FromQuery] PageQueryParameters queryParams)
         {
             if (string.IsNullOrWhiteSpace(bookId))
+            {
+                _logger.LogWarning("❌ Book ID was null or empty in GetPaginatedPages.");
                 return BadRequest(ApiResponse<string>.Fail("Book ID is required."));
+            }
+
+            _logger.LogInformation("📥 Received request to get paginated pages for BookId: {BookId}", bookId);
 
             var result = await _pageService.GetPaginatedPagesByBookIdAsync(bookId, queryParams);
 
+            _logger.LogInformation("📤 Successfully returned {Count} pages. ContinuationToken: {Token}",
+                result.Data.Count(), result.ContinuationToken ?? "<null>");
+
             return Ok(ApiResponse<PaginatedContinuationResponse<PageDto>>.SuccessResponse(result));
         }
+
 
     }
 }
