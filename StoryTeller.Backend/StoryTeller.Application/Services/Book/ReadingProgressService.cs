@@ -1,39 +1,33 @@
-﻿using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
+﻿using AutoMapper;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Book;
+using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 
 namespace StoryTeller.StoryTeller.Backend.StoryTeller.Application.Services.Book
 {
-    public class ReadingProgressService
+
+    public class ReadingProgressService : IReadingProgressService
     {
         private readonly IReadingProgressRepository _repo;
+        private readonly IMapper _mapper;
 
-        public ReadingProgressService(IReadingProgressRepository repo)
+        public ReadingProgressService(IReadingProgressRepository repo, IMapper mapper)
         {
             _repo = repo;
+            _mapper = mapper;
         }
 
-        public async Task<ReadingProgressDto?> GetAsync(string userId, string bookId)
+        public async Task<ReadingProgressDto?> GetProgressAsync(string userId, string bookId)
         {
-            var progress = await _repo.GetAsync(userId, bookId);
-            return progress is null ? null : new ReadingProgressDto
-            {
-                UserId = progress.UserId,
-                BookId = progress.BookId,
-                SectionIndex = progress.SectionIndex
-            };
+            var entity = await _repo.GetAsync(userId, bookId);
+            return entity is null ? null : _mapper.Map<ReadingProgressDto>(entity);
         }
 
-        public async Task SaveAsync(ReadingProgressDto dto)
+        public async Task SaveProgressAsync(ReadingProgressDto dto)
         {
-            var progress = new ReadingProgress
-            {
-                UserId = dto.UserId,
-                BookId = dto.BookId,
-                SectionIndex = dto.SectionIndex
-            };
-            await _repo.UpsertAsync(progress);
+            var entity = _mapper.Map<ReadingProgress>(dto);
+            await _repo.UpsertAsync(entity);
         }
     }
-
 }

@@ -1,36 +1,33 @@
-﻿using AutoMapper;
-using Microsoft.Azure.Cosmos;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.DTOs.Books;
+﻿using Microsoft.Azure.Cosmos;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Repositories.Book;
-using StoryTeller.StoryTeller.Backend.StoryTeller.Application.Interfaces.Services.Book;
 using StoryTeller.StoryTeller.Backend.StoryTeller.Domain.Entities;
 using System.Net;
 
-namespace StoryTeller.StoryTeller.Backend.StoryTeller.Infrastructure.Repositories.Book
+public class ReadingProgressRepository : IReadingProgressRepository
 {
-    public class ReadingProgressService : IReadingProgressService
+    private readonly Container _container;
+
+    public ReadingProgressRepository(CosmosClient client, IConfiguration config)
     {
-        private readonly IReadingProgressRepository _repo;
-        private readonly IMapper _mapper;
+        _container = client.GetContainer("YourDbName", "ReadingProgress");
+    }
 
-        public ReadingProgressService(IReadingProgressRepository repo, IMapper mapper)
+    public async Task<ReadingProgress?> GetAsync(string userId, string bookId)
+    {
+        try
         {
-            _repo = repo;
-            _mapper = mapper;
+            var response = await _container.ReadItemAsync<ReadingProgress>(
+                id: $"{userId}:{bookId}", partitionKey: new PartitionKey(userId));
+            return response.Resource;
         }
-
-        public async Task<ReadingProgressDto?> GetProgressAsync(string userId, string bookId)
+        catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
         {
-            var entity = await _repo.GetAsync(userId, bookId);
-            return entity is null ? null : _mapper.Map<ReadingProgressDto>(entity);
-        }
-
-        public async Task SaveProgressAsync(ReadingProgressDto dto)
-        {
-            var entity = _mapper.Map<ReadingProgress>(dto);
-            await _repo.UpsertAsync(entity);
+            return null;
         }
     }
 
-
+    public async Task UpsertAsync(ReadingProgress progress)
+    {
+        await _container.UpsertItemAsync(progress, new PartitionKey(progress.UserId));
+    }
 }
